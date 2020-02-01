@@ -57,7 +57,6 @@ public class Scheduler {
 		
 		//check if elevator reached correct floor as per requests, check if elevator completed after the request time
 		//and check if elevator stopped at request's current floor
-		System.out.println("test");
 		if(currentFloor == requests.peek().getRequestedFloor() && requests.peek().getTime().compareTo(completionTime) < 0 && visitedRequestedFloor) {
 			System.out.println("Elevator completed request at "+completionTime.toString());
 			

@@ -54,7 +54,7 @@ public class Elevator implements Runnable{
 				}
 			}
 			else if(requestData.getDirection() == Direction.DOWN) {
-				for(int i = currentFloor; i <requestData.getRequestedFloor(); i--) {
+				for(int i = currentFloor; i > requestData.getRequestedFloor(); i--) {
 					this.setCurrentFloor(i-1);
 				}
 			}

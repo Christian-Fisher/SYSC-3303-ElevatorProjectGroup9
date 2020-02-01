@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -44,6 +45,7 @@ public class FloorSubsystem implements Runnable {
 	 * string and convert it into a RequestData stucture.
 	 * 
 	 */
+	@SuppressWarnings("deprecation")
 	private void readDataFromFile() {
 		File inputFile = new File("inputFile.txt");	//Creates the file. For testing the file is inputFile.txt
 		try {
@@ -51,11 +53,16 @@ public class FloorSubsystem implements Runnable {
 			while(fileReader.hasNextLine()) {	//Iterates through the file
 				String line = fileReader.nextLine();	
 				String[] splitLine = line.split(" ");	//Splits each catagory into an array of strings
+				Direction move = Direction.DOWN;
 				if(splitLine[2].equals("Up")) {	//Checks the direction in the request, and adds the RequestData object to the arrayList based on the Direction
-					dataArray.add(new RequestData(new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]), Integer.parseInt(splitLine[1]), Direction.UP, Integer.parseInt(splitLine[3])));
-				}else if(splitLine[2].equals("Down")) {
-					dataArray.add(new RequestData(new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]), Integer.parseInt(splitLine[1]), Direction.DOWN, Integer.parseInt(splitLine[3])));
+					move = Direction.UP;
 				}
+				Date date = new Date();
+				Date inputTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]);
+				date.setTime(inputTime.getTime());
+				
+				dataArray.add(new RequestData(date, Integer.parseInt(splitLine[1]), move, Integer.parseInt(splitLine[3])));
+
 			}
 			fileReader.close();//Closes the file
 		} catch (FileNotFoundException e) {
