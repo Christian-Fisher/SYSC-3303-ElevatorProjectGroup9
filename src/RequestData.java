@@ -46,15 +46,6 @@ public class RequestData implements Serializable {
 	public int getCurrentFloor() {
 		return this.currentFloor;
 	}
-	
-	/**
-	 * set the current floor number 
-	 * to the int currentFloor
-	 * @param int - currentFloor
-	 */
-	public void setCurrentFloor(int currentFloor) {
-		this.currentFloor = currentFloor;
-	}
 
 	/**
 	 * get the int value
