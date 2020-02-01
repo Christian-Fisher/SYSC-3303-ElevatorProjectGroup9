@@ -14,8 +14,9 @@ public class Elevator implements Runnable{
 	public void run() {
 		while(true) {
 			//Elevator calling the scheduler
-			RequestData requestData = new RequestData(scheduler.processRequest().getTime(), scheduler.processRequest().getCurrentFloor(),
-					scheduler.processRequest().getDirection(), scheduler.processRequest().getRequestedFloor());
+			RequestData requestData = scheduler.processRequest();
+			
+			int diff = requestDate.getCurrentFloor() - requestData.getRequestedFloor();
 			//Elevator sends the info back
 			Date date = new Date(System.currentTimeMillis());
 			scheduler.completeRequest(date, requestData.getRequestedFloor(), true);
