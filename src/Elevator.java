@@ -67,5 +67,4 @@ public class Elevator implements Runnable{
 		}
 		
 	}
-
 }
