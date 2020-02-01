@@ -58,7 +58,7 @@ public class Scheduler {
 	}
 	
 	public static void main(String[] args) {
-		Scheduler scheduler = new Scheduler();
+		Scheduler scheduler = new Scheduler();		
 		//initialize floor threads and passing this scheduler
 		//initialize elevator threads and passing with scheduler
 		

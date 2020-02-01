@@ -20,7 +20,7 @@ public class RequestData implements Serializable {
 	Direction move;
 	private static final long serialVersionUID = 1L;
 	private int currentFloor;
-	private Date time;
+		private Date time;
 	private int requestFloor;
 	
 	public RequestData(Date time, int currentFloor, Direction direction, int requestFloor) {
@@ -47,6 +47,15 @@ public class RequestData implements Serializable {
 		return this.currentFloor;
 	}
 	
+	/**
+	 * set the current floor number 
+	 * to the int currentFloor
+	 * @param int - currentFloor
+	 */
+	public void setCurrentFloor(int currentFloor) {
+		this.currentFloor = currentFloor;
+	}
+
 	/**
 	 * get the int value
 	 * representing the floor number
