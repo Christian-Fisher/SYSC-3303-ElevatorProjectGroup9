@@ -1,5 +1,7 @@
 package firstiteration;
 
+import java.util.Date;
+
 public class Elevator implements Runnable{
 	
 	private Scheduler scheduler;
@@ -12,10 +14,11 @@ public class Elevator implements Runnable{
 	public void run() {
 		while(true) {
 			//Elevator calling the scheduler
-			FloorSubSystem floorSubSys = new FloorSubSystem(scheduler.getInfo().getTime(), scheduler.getInfo().getFloorNum(),
-					scheduler.getInfo().getDirectionButton(), scheduler.getInfo().getFloorButton());
+			RequestData requestData = new RequestData(scheduler.processRequest().getTime(), scheduler.processRequest().getCurrentFloor(),
+					scheduler.processRequest().getDirection(), scheduler.processRequest().getRequestedFloor());
 			//Elevator sends the info back
-			scheduler.sendInfo(floorSubSys);
+			Date date = new Date(System.currentTimeMillis());
+			scheduler.completeRequest(date, requestData.getRequestedFloor(), true);
 		}
 		
 	}
