@@ -70,7 +70,13 @@ public class Elevator implements Runnable{
 		
 	}
 	
-	public void move(int currentFloor, RequestData.Direction d, int desiredFloor) {
+	/**
+	 * Method moves the elevator either up or down to the desired floor 
+	 * @param currentFloor - int representing the floor the elevator is currently one
+	 * @param d - Direction the elevator must move to reach desired floor
+	 * @param desiredFloor - int representing the desired floor that has been requested to go to
+	 */
+	private void move(int currentFloor, RequestData.Direction d, int desiredFloor) {
 		if(d == RequestData.Direction.UP) {
 			for(int i = currentFloor; i <desiredFloor; i++) {
 				this.setCurrentFloor(i+1);
