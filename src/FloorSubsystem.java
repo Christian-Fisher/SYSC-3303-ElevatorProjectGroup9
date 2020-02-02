@@ -25,7 +25,14 @@ public class FloorSubsystem implements Runnable {
 		this.scheduler = scheduler;
 		readDataFromFile();
 	}
-
+	/**
+	 * Returns dataArray, a Linked List, consisting of all the requests obtained from the input file 
+	 * @return the dataArray 
+	 */
+	public LinkedList<RequestData> getdataArray() {
+		return this.dataArray;
+	}
+	
 	/**
 	 * @Override This method will be run when this thread is started. Run will
 	 *           iterate through the dataArray and send every item to the scheduler.
@@ -62,7 +69,7 @@ public class FloorSubsystem implements Runnable {
 			Scanner fileReader = new Scanner(inputFile); // Creates a scanner to read the file
 			while (fileReader.hasNextLine()) { // Iterates through the file
 				String line = fileReader.nextLine();
-				String[] splitLine = line.split(" "); // Splits each catagory into an array of strings
+				String[] splitLine = line.split(" "); // Splits each category into an array of strings
 				Direction move = Direction.DOWN;
 				if (splitLine[2].equals("Up")) { // Checks the direction in the request, and adds the RequestData object  to the arrayList based on the Direction
 					move = Direction.UP;
