@@ -30,9 +30,9 @@ public class Scheduler {
 	 * @throws ParseException
 	 */
 	public synchronized RequestData processRequest() {
-		while(requests.peek()==null) {
+		while(requests.peek()==null) {		//Checks for the case where the list is empty
 			try {
-				wait();
+				wait();						//Waits until the list is not empty
 			}catch(InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -41,9 +41,18 @@ public class Scheduler {
 		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
 		return r;
 	}
+	
+	/**
+	 * 
+	 * @return boolean: is the completedRequests list empty
+	 */
 	public synchronized boolean isCompletedListEmpty() {
 		return completedRequests.isEmpty();
 		}
+	/**
+	 * 
+	 * @return The last event in the completedRequests list
+	 */
 	public synchronized RequestData getCompletedRequest() {
 		return completedRequests.pop();
 		}
