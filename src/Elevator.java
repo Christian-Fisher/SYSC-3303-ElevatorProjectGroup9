@@ -54,11 +54,13 @@ public class Elevator implements Runnable{
 			}
 			
 			//Elevator moves in the desired direction to the requested floor
+
 			if(requestData.getDirection() == RequestData.Direction.UP) {
 				move(currentFloor, RequestData.Direction.UP, requestData.getRequestedFloor());
 			}
 			else if(requestData.getDirection() == RequestData.Direction.DOWN) {
 				move(currentFloor, RequestData.Direction.DOWN, requestData.getRequestedFloor());
+
 			}
 			else {
 				move(currentFloor, RequestData.Direction.IDLE, requestData.getRequestedFloor());

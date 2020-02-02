@@ -16,11 +16,10 @@ import java.util.StringTokenizer;
  *	and elevator 
  */
 public class RequestData implements Serializable {
-	enum Direction {UP, DOWN, IDLE}
 	Direction move;
 	private static final long serialVersionUID = 1L;
 	private int currentFloor;
-		private Date time;
+	private Date time;
 	private int requestFloor;
 	
 	public RequestData(Date time, int currentFloor, Direction direction, int requestFloor) {
