@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
@@ -57,12 +58,14 @@ public class FloorSubsystem implements Runnable {
 				if(splitLine[2].equals("Up")) {	//Checks the direction in the request, and adds the RequestData object to the arrayList based on the Direction
 					move = Direction.UP;
 				}
-				Date date = new Date();
-				Date inputTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]);
-				date.setTime(inputTime.getTime());
-				
-				dataArray.add(new RequestData(date, Integer.parseInt(splitLine[1]), move, Integer.parseInt(splitLine[3])));
 
+				Date inputTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]);
+				Date date = new Date(); 
+				date.setHours(inputTime.getHours());
+				date.setMinutes(inputTime.getMinutes());
+				date.setSeconds(inputTime.getSeconds());
+
+				dataArray.add(new RequestData(date, Integer.parseInt(splitLine[1]), move, Integer.parseInt(splitLine[3])));
 			}
 			fileReader.close();//Closes the file
 		} catch (FileNotFoundException e) {
