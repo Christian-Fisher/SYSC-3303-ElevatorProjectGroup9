@@ -31,11 +31,18 @@ public class FloorSubsystem implements Runnable {
 	This method will be run when this thread is started. Run will iterate through the dataArray and send 
 	every item to the scheduler.
 	*/
-	public void run() {
+	public synchronized void run() {
 		Iterator<RequestData> dataArrayIterator = dataArray.iterator(); 	//Creates a iterator
 		while(dataArrayIterator.hasNext()) {								//Iterates through the arraylist
 			scheduler.placeRequest(dataArrayIterator.next());				//Sends the request to the scheduler
-			
+			while(!scheduler.isCompletedListEmpty()) {
+				try {
+					wait();
+				}catch(InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			System.out.println(scheduler.getCompletedRequest().toString() + "HAS BEEN COMPELTED");
 		}
 		
 	}

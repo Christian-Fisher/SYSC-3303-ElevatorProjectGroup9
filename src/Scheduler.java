@@ -11,7 +11,7 @@ import java.util.LinkedList;
  */
 public class Scheduler {
 	private LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
-	
+	private LinkedList<RequestData> completedRequests = new LinkedList<RequestData>();
 	/**
 	 * Places a request by added RequestData to requests.
 	 * Notifies available elevators to accept new request
@@ -41,6 +41,12 @@ public class Scheduler {
 		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
 		return r;
 	}
+	public synchronized boolean isCompletedListEmpty() {
+		return completedRequests.isEmpty();
+		}
+	public synchronized RequestData getCompletedRequest() {
+		return completedRequests.pop();
+		}
 	
 	/**
 	 * Validates the completion of a request by an elevator and pops that request off the queue
@@ -59,9 +65,10 @@ public class Scheduler {
 		//and check if elevator stopped at request's current floor
 		if(currentFloor == requests.peek().getRequestedFloor() && requests.peek().getTime().compareTo(completionTime) < 0 && visitedRequestedFloor) {
 			System.out.println("Elevator completed request at "+completionTime.toString());
-			
+			RequestData completedRequest = requests.pop();
+			completedRequests.add(completedRequest);
 			notifyAll();
-			return requests.pop();
+			return completedRequest;
 		}
 		return null;
 	}
