@@ -47,23 +47,23 @@ public class Elevator implements Runnable{
 			RequestData requestData = scheduler.processRequest();
 			int diff = currentFloor - requestData.getCurrentFloor();
 			if(diff>0) {
-				move(currentFloor, RequestData.Direction.DOWN, requestData.getCurrentFloor());
+				move(currentFloor, Direction.DOWN, requestData.getCurrentFloor());
 			}
 			else if(diff < 0) {
-				move(currentFloor, RequestData.Direction.UP, requestData.getCurrentFloor());
+				move(currentFloor, Direction.UP, requestData.getCurrentFloor());
 			}
 			
 			//Elevator moves in the desired direction to the requested floor
 
-			if(requestData.getDirection() == RequestData.Direction.UP) {
-				move(currentFloor, RequestData.Direction.UP, requestData.getRequestedFloor());
+			if(requestData.getDirection() == Direction.UP) {
+				move(currentFloor, Direction.UP, requestData.getRequestedFloor());
 			}
-			else if(requestData.getDirection() == RequestData.Direction.DOWN) {
-				move(currentFloor, RequestData.Direction.DOWN, requestData.getRequestedFloor());
+			else if(requestData.getDirection() == Direction.DOWN) {
+				move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
 
 			}
 			else {
-				move(currentFloor, RequestData.Direction.IDLE, requestData.getRequestedFloor());
+				move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
 			}
 			//Elevator sends the info back
 			Date date = new Date(System.currentTimeMillis());
@@ -78,13 +78,13 @@ public class Elevator implements Runnable{
 	 * @param d - Direction the elevator must move to reach desired floor
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
 	 */
-	private void move(int currentFloor, RequestData.Direction d, int desiredFloor) {
-		if(d == RequestData.Direction.UP) {
+	private void move(int currentFloor, Direction d, int desiredFloor) {
+		if(d == Direction.UP) {
 			for(int i = currentFloor; i <desiredFloor; i++) {
 				this.setCurrentFloor(i+1);
 			}
 		}
-		else if(d == RequestData.Direction.DOWN) {
+		else if(d == Direction.DOWN) {
 			for(int i = currentFloor; i > desiredFloor; i--) {
 				this.setCurrentFloor(i-1);
 			}
