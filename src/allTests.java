@@ -19,10 +19,6 @@ class allTests {
 		floorThread = new Thread(new FloorSubsystem(scheduler));	
 		elevatorThread = new Thread(new Elevator(scheduler));
 	}
-
-	@AfterEach
-	void tearDown() throws Exception {
-	}
 	
 	/**
 	 * When the FloorSubsystem constructor is called, it uses the readInputFromFile() function
