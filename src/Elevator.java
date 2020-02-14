@@ -35,6 +35,67 @@ public class Elevator implements Runnable{
 		this.currentFloor = newFloor;
 	}
 	
+	public enum ElevatorStateMachine {
+		
+		CurrFloorDoorsClosed {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return Moving1;
+			}
+			
+		},
+		
+		Moving1 {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return ArriveReqFloor;
+			}
+			
+		},
+		
+		ArriveReqFloor {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return ReqFloorDoorsOpened;
+			}
+			
+		},
+		
+		ReqFloorDoorsOpened {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return Moving2;
+			}
+			
+		},
+		
+		Moving2 {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return ArriveDestFloor;
+			}
+			
+		},
+		
+		ArriveDestFloor {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return DestFloorDoorsOpened;
+			}
+			
+		},
+		
+		DestFloorDoorsOpened {
+			@Override
+			public ElevatorStateMachine nextState() {
+				return this;
+			}
+			
+		};
+		
+		public abstract ElevatorStateMachine nextState();
+	}
+	
 	/**
 	 * Runs continuously once the thread is started until the program is terminated
 	 * Calls the scheduler to see if there is work to be done, moves accordingly, and then sends 
