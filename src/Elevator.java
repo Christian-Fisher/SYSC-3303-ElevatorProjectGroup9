@@ -35,6 +35,14 @@ public class Elevator implements Runnable{
 		this.currentFloor = newFloor;
 	}
 	
+	/**
+	 * 
+	 * @author Nicholas Porter
+	 * State machine for the elvator using
+	 * Java enums
+	 * 7 states in total
+	 *
+	 */
 	public enum ElevatorStateMachine {
 		
 		CurrFloorDoorsClosed {
@@ -103,6 +111,10 @@ public class Elevator implements Runnable{
 	 */
 	@Override
 	public void run() {
+		
+		// intialize elevator state to current floor with doors closed
+		ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
+		
 		while(true) {
 			//Elevator calling the scheduler
 			RequestData requestData = scheduler.processRequest();
@@ -129,6 +141,53 @@ public class Elevator implements Runnable{
 			//Elevator sends the info back
 			Date date = new Date(System.currentTimeMillis());
 			scheduler.completeRequest(date, this.currentFloor, true);
+			
+			
+			// Switch statement for elevator state
+			switch (currState) {
+			
+				case CurrFloorDoorsClosed: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case Moving1: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case ArriveReqFloor: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case ReqFloorDoorsOpened: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case Moving2: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case ArriveDestFloor: {
+					currState = currState.nextState();
+					break;
+					
+				}
+				
+				case DestFloorDoorsOpened: {
+					currState = currState.nextState();
+					break;
+					
+				}
+			}
 		}
 		
 	}
