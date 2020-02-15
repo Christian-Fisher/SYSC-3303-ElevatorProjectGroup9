@@ -6,12 +6,14 @@ import java.util.LinkedList;
 /**
  * Scheduler is being used as a communication channel from Floor thread to Elevator thread and back again (for now)
  *
- * @author Dhyan Pathak
+ * @author Dhyan Pathak, Karanvir Chaudhary
  * @version 1.0
  */
 public class Scheduler {
 	private LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
 	private LinkedList<RequestData> completedRequests = new LinkedList<RequestData>();
+	private schedulerStateMachine currentState = schedulerStateMachine.noRequests;
+	
 	/**
 	 * Places a request by added RequestData to requests.
 	 * Notifies available elevators to accept new request
@@ -22,6 +24,9 @@ public class Scheduler {
 		System.out.println(r.getTime().toString() + " -  Request made at floor #" + r.getCurrentFloor() + 
 				" to go " + r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
 		notifyAll();
+		//The floor subsystem calls the placeRequest function and gives the Scheduler all the requests. 
+		//currentState = schedulerStateMachine.uncompletedRequests;
+		currentState = currentState.nextState(); //changes state to uncompletedRequests
 	};
 	
 	/**
@@ -37,9 +42,15 @@ public class Scheduler {
 				e.printStackTrace();
 			}
 		}
+		
 		RequestData r = requests.peek();
 		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
+		//the elevators call the processRequest, and they get back one of the requests saved in the scheduler. 
+		//The elevator then processes the request and makes a call to completedRequest when finished. 
+		//currentState = schedulerStateMachine.requestAdded;
+		currentState =currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
 		return r;
+		
 	}
 	
 	/**
@@ -77,9 +88,62 @@ public class Scheduler {
 			RequestData completedRequest = requests.pop();
 			completedRequests.add(completedRequest);
 			notifyAll();
+			//Once the elevator has processed the request, it sends back info to the scheduler. The scheduler 
+			// then removes the request from requests, and adds it to the list of completed Requests. 
+			
+			//currentState = schedulerStateMachine.completedRequest;
+			currentState = currentState.nextState();
+			//Once a request has been completed, we should change its state. 
+			//Option #1 is, if there are no more requests, then the state of the scheduler should be noRequests. 
+			//Option #2 is, if there are still some requests left, then we should change the state to uncompletedRequests. 
+			if(requests.isEmpty()) {
+				//currentState = schedulerStateMachine.noRequests;
+				currentState = currentState.nextState();
+			}
+			else {
+				currentState=schedulerStateMachine.uncompletedRequests;
+			}
 			return completedRequest;
 		}
 		return null;
+	}
+	
+	//Enums used to represent the 4 states of the scheduler state machine. 
+	
+public enum schedulerStateMachine {
+		noRequests {
+			@Override
+			public schedulerStateMachine nextState() {
+				return uncompletedRequests;
+			}
+			
+		},
+		
+		uncompletedRequests {
+			@Override
+			public schedulerStateMachine nextState() {
+				return requestAdded;
+			}
+			
+		},
+		
+		requestAdded {
+			@Override
+			public schedulerStateMachine nextState() {
+				return uncompletedRequests;
+			}
+			
+		},
+		
+		completedRequest {
+			@Override
+			public schedulerStateMachine nextState() {
+				return noRequests;
+			}
+			
+		};
+		
+		public abstract schedulerStateMachine nextState();
 	}
 	
 	public static void main(String[] args) {
