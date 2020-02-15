@@ -27,7 +27,7 @@ public class Scheduler {
 		//The floor subsystem calls the placeRequest function and gives the Scheduler all the requests. 
 		//currentState = schedulerStateMachine.uncompletedRequests;
 		currentState = currentState.nextState(); //changes state to uncompletedRequests
-	}
+	};
 	
 	/**
 	 * Method invoked by Elevator subsystem to accept new request to fulfill
