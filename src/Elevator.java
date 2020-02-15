@@ -18,6 +18,7 @@ public class Elevator implements Runnable{
 		this.scheduler = scheduler;
 		currentFloor = 0;
 	}
+	
 
 	/**
 	 * Returns the current floor this elevator is on
@@ -51,6 +52,7 @@ public class Elevator implements Runnable{
 				return Moving1;
 			}
 			
+			
 		},
 		
 		Moving1 {
@@ -58,6 +60,7 @@ public class Elevator implements Runnable{
 			public ElevatorStateMachine nextState() {
 				return ArriveReqFloor;
 			}
+			
 			
 		},
 		
@@ -67,6 +70,7 @@ public class Elevator implements Runnable{
 				return ReqFloorDoorsOpened;
 			}
 			
+			
 		},
 		
 		ReqFloorDoorsOpened {
@@ -74,6 +78,8 @@ public class Elevator implements Runnable{
 			public ElevatorStateMachine nextState() {
 				return Moving2;
 			}
+			
+
 			
 		},
 		
@@ -83,6 +89,8 @@ public class Elevator implements Runnable{
 				return ArriveDestFloor;
 			}
 			
+
+			
 		},
 		
 		ArriveDestFloor {
@@ -90,14 +98,17 @@ public class Elevator implements Runnable{
 			public ElevatorStateMachine nextState() {
 				return DestFloorDoorsOpened;
 			}
+
 			
 		},
 		
 		DestFloorDoorsOpened {
 			@Override
 			public ElevatorStateMachine nextState() {
-				return this;
+				return CurrFloorDoorsClosed;
 			}
+			
+
 			
 		};
 		
@@ -118,41 +129,37 @@ public class Elevator implements Runnable{
 		while(true) {
 			//Elevator calling the scheduler
 			RequestData requestData = scheduler.processRequest();
-			int diff = currentFloor - requestData.getCurrentFloor();
-			if(diff>0) {
-				move(currentFloor, Direction.DOWN, requestData.getCurrentFloor());
-			}
-			else if(diff < 0) {
-				move(currentFloor, Direction.UP, requestData.getCurrentFloor());
-			}
-			
-			//Elevator moves in the desired direction to the requested floor
-
-			if(requestData.getDirection() == Direction.UP) {
-				move(currentFloor, Direction.UP, requestData.getRequestedFloor());
-			}
-			else if(requestData.getDirection() == Direction.DOWN) {
-				move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
-
-			}
-			else {
-				move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
-			}
-			//Elevator sends the info back
-			Date date = new Date(System.currentTimeMillis());
-			scheduler.completeRequest(date, this.currentFloor, true);
 			
 			
 			// Switch statement for elevator state
 			switch (currState) {
 			
 				case CurrFloorDoorsClosed: {
+					int diff = currentFloor - requestData.getCurrentFloor();
+					if(diff>0) {
+						move(currentFloor, Direction.DOWN, requestData.getCurrentFloor());
+					}
+					else if(diff < 0) {
+						move(currentFloor, Direction.UP, requestData.getCurrentFloor());
+					}
 					currState = currState.nextState();
 					break;
 					
 				}
 				
 				case Moving1: {
+					//Elevator moves in the desired direction to the requested floor
+
+					if(requestData.getDirection() == Direction.UP) {
+						move(currentFloor, Direction.UP, requestData.getRequestedFloor());
+					}
+					else if(requestData.getDirection() == Direction.DOWN) {
+						move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
+
+					}
+					else {
+						move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
+					}
 					currState = currState.nextState();
 					break;
 					
@@ -171,6 +178,18 @@ public class Elevator implements Runnable{
 				}
 				
 				case Moving2: {
+					//Elevator moves in the desired direction to the requested floor
+
+					if(requestData.getDirection() == Direction.UP) {
+						move(currentFloor, Direction.UP, requestData.getRequestedFloor());
+					}
+					else if(requestData.getDirection() == Direction.DOWN) {
+						move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
+
+					}
+					else {
+						move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
+					}
 					currState = currState.nextState();
 					break;
 					
@@ -187,7 +206,26 @@ public class Elevator implements Runnable{
 					break;
 					
 				}
+			}		
+			
+
+			
+			//Elevator moves in the desired direction to the requested floor
+
+			if(requestData.getDirection() == Direction.UP) {
+				move(currentFloor, Direction.UP, requestData.getRequestedFloor());
 			}
+			else if(requestData.getDirection() == Direction.DOWN) {
+				move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
+
+			}
+			else {
+				move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
+			}
+			//Elevator sends the info back
+			Date date = new Date(System.currentTimeMillis());
+			scheduler.completeRequest(date, this.currentFloor, true);
+			
 		}
 		
 	}
