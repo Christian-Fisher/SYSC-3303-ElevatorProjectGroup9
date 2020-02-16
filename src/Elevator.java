@@ -10,7 +10,9 @@ public class Elevator implements Runnable{
 	private Scheduler scheduler;
 	private int currentFloor;
 	private RequestData requestData = null;
-
+	// initialize elevator state to current floor with doors closed
+	ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
+	
 	/**
 	 * Constructor for the Elevator class
 	 * @param scheduler - A Scheduler to coordinate when work must be done
@@ -123,10 +125,6 @@ public class Elevator implements Runnable{
 	 */
 	@Override
 	public void run() {
-		
-		// intialize elevator state to current floor with doors closed
-		ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
-		
 		while(true) {
 			
 			// Switch statement for elevator state
@@ -205,7 +203,7 @@ public class Elevator implements Runnable{
 					
 				}
 			}
-			System.out.println("Current state: "+currState);
+			System.out.println("Elevator state: "+currState);
 		}
 		
 	}
