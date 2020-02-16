@@ -10,9 +10,9 @@ import java.util.LinkedList;
  * @version 1.0
  */
 public class Scheduler {
-	private LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
+	private static LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
 	private LinkedList<RequestData> completedRequests = new LinkedList<RequestData>();
-	private schedulerStateMachine currentState = schedulerStateMachine.noRequests;
+	schedulerStateMachine currentState = schedulerStateMachine.noRequests;
 	
 	/**
 	 * Places a request by added RequestData to requests.
@@ -20,13 +20,17 @@ public class Scheduler {
 	 * @param r custom data structure RequestData that contains all necessary information of request
 	 */
 	public synchronized void placeRequest(RequestData r) {
+		System.out.println("Scheduler state: "+currentState.toString());
+
 		requests.add(r);
 		System.out.println(r.getTime().toString() + " -  Request made at floor #" + r.getCurrentFloor() + 
 				" to go " + r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
 		notifyAll();
 		//The floor subsystem calls the placeRequest function and gives the Scheduler all the requests. 
-		//currentState = schedulerStateMachine.uncompletedRequests;
-		currentState = currentState.nextState(); //changes state to uncompletedRequests
+		if(currentState.equals(Scheduler.schedulerStateMachine.noRequests)) {
+			currentState = currentState.nextState(); //changes state to uncompletedRequests
+			System.out.println("Scheduler state: "+currentState.toString());
+		}
 	};
 	
 	/**
@@ -47,8 +51,10 @@ public class Scheduler {
 		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
 		//the elevators call the processRequest, and they get back one of the requests saved in the scheduler. 
 		//The elevator then processes the request and makes a call to completedRequest when finished. 
-		//currentState = schedulerStateMachine.requestAdded;
-		currentState =currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
+
+		currentState = currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
+
+		System.out.println("Scheduler state: "+currentState.toString());
 		return r;
 		
 	}
@@ -90,27 +96,17 @@ public class Scheduler {
 			notifyAll();
 			//Once the elevator has processed the request, it sends back info to the scheduler. The scheduler 
 			// then removes the request from requests, and adds it to the list of completed Requests. 
-			
-			//currentState = schedulerStateMachine.completedRequest;
-			currentState = currentState.nextState();
 			//Once a request has been completed, we should change its state. 
-			//Option #1 is, if there are no more requests, then the state of the scheduler should be noRequests. 
-			//Option #2 is, if there are still some requests left, then we should change the state to uncompletedRequests. 
-			if(requests.isEmpty()) {
-				//currentState = schedulerStateMachine.noRequests;
-				currentState = currentState.nextState();
-			}
-			else {
-				currentState=schedulerStateMachine.uncompletedRequests;
-			}
+			currentState = currentState.nextState();
+			System.out.println("Scheduler state: "+currentState.toString());
+
 			return completedRequest;
 		}
 		return null;
 	}
 	
 	//Enums used to represent the 4 states of the scheduler state machine. 
-	
-public enum schedulerStateMachine {
+	public enum schedulerStateMachine {
 		noRequests {
 			@Override
 			public schedulerStateMachine nextState() {
@@ -122,22 +118,20 @@ public enum schedulerStateMachine {
 		uncompletedRequests {
 			@Override
 			public schedulerStateMachine nextState() {
-				return requestAdded;
+				return completedRequest;
 			}
 			
 		},
-		
-		requestAdded {
-			@Override
-			public schedulerStateMachine nextState() {
-				return uncompletedRequests;
-			}
-			
-		},
-		
+				
 		completedRequest {
 			@Override
+			//Option #1 is, if there are no more requests, then the state of the scheduler should be noRequests. 
+			//Option #2 is, if there are still some requests left, then we should change the state to uncompletedRequests. 
+
 			public schedulerStateMachine nextState() {
+				if(requests.size() > 0) {
+					return uncompletedRequests;
+				}
 				return noRequests;
 			}
 			
