@@ -2,7 +2,7 @@ import java.util.Date;
 /**
  * This class represents an Elevator that is to be part of an elevator control simulator.
  * @author Sonia Hassan-legault, Nicholas Porter
- * @version 2.0 2020-02-15
+ * @version 3.0 2020-02-15
  *
  */
 public class Elevator implements Runnable{
@@ -10,9 +10,8 @@ public class Elevator implements Runnable{
 	private Scheduler scheduler;
 	private int currentFloor;
 	private RequestData requestData = null;
-	// initialize elevator state to current floor with doors closed
-	ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
-	
+	private Direction dir;
+
 	/**
 	 * Constructor for the Elevator class
 	 * @param scheduler - A Scheduler to coordinate when work must be done
@@ -22,21 +21,43 @@ public class Elevator implements Runnable{
 		currentFloor = 0;
 	}
 	
-
+	
 	/**
 	 * Returns the current floor this elevator is on
 	 * @return int - the current floor
 	 */
-	public int getCurrentFloor() {
-		return currentFloor;
+	public synchronized int getCurrentFloor() {
+		return this.currentFloor;
 	}
 	
 	/**
-	 * Set the current floor number to the value of newFloor
-	 * @param int - newFloor
+	 * Update (increment / decrement) currentFloor based on
+	 * direction elevator is travelling
 	 */
-	public void setCurrentFloor(int newFloor) {
-		this.currentFloor = newFloor;
+	public synchronized void updateCurrentFloor() {
+		if (this.getDirection() == Direction.UP) {
+			this.currentFloor++;
+		}
+		else if (this.getDirection() == Direction.DOWN) {
+			this.currentFloor--;
+		} else {}
+	}
+		
+	
+	/**
+	 * 
+	 * @return Direction elevator is travelling
+	 */
+	public synchronized Direction getDirection() {
+		return this.dir;
+	}
+	
+	/**
+	 * Set the direction the elevator is travelling
+	 * @param d (Direction)
+	 */
+	public synchronized void setDirection(Direction d) {
+		this.dir = d;
 	}
 	
 	/**
@@ -44,7 +65,7 @@ public class Elevator implements Runnable{
 	 * @author Nicholas Porter
 	 * State machine for the elvator using
 	 * Java enums
-	 * 7 states in total
+	 * 4 states in total
 	 *
 	 */
 	public enum ElevatorStateMachine {
@@ -52,13 +73,13 @@ public class Elevator implements Runnable{
 		CurrFloorDoorsClosed {
 			@Override
 			public ElevatorStateMachine nextState() {
-				return Moving1;
+				return Moving;
 			}
 			
 			
 		},
 		
-		Moving1 {
+		Moving {
 			@Override
 			public ElevatorStateMachine nextState() {
 				return ArriveReqFloor;
@@ -79,40 +100,9 @@ public class Elevator implements Runnable{
 		ReqFloorDoorsOpened {
 			@Override
 			public ElevatorStateMachine nextState() {
-				return Moving2;
-			}
-			
-
-			
-		},
-		
-		Moving2 {
-			@Override
-			public ElevatorStateMachine nextState() {
-				return ArriveDestFloor;
-			}
-			
-
-			
-		},
-		
-		ArriveDestFloor {
-			@Override
-			public ElevatorStateMachine nextState() {
-				return DestFloorDoorsOpened;
-			}
-
-			
-		},
-		
-		DestFloorDoorsOpened {
-			@Override
-			public ElevatorStateMachine nextState() {
 				return CurrFloorDoorsClosed;
 			}
-			
 
-			
 		};
 		
 		public abstract ElevatorStateMachine nextState();
@@ -125,6 +115,10 @@ public class Elevator implements Runnable{
 	 */
 	@Override
 	public void run() {
+		
+		// intialize elevator state to current floor with doors closed
+		ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
+		
 		while(true) {
 			
 			// Switch statement for elevator state
@@ -139,23 +133,33 @@ public class Elevator implements Runnable{
 					
 				}
 				
-				case Moving1: {
+				case Moving: {
 					//Elevator moves to the floor of the request
 					
-					int diff = currentFloor - requestData.getCurrentFloor();
-					if(diff>0) {
-						move(currentFloor, Direction.DOWN, requestData.getCurrentFloor());
+					int diff = this.getCurrentFloor() - requestData.getCurrentFloor();
+					if(diff > 0) {
+						this.setDirection(Direction.DOWN);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 					else if(diff < 0) {
-						move(currentFloor, Direction.UP, requestData.getCurrentFloor());
+						this.setDirection(Direction.UP);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 					else {
-						move(currentFloor, Direction.IDLE, requestData.getCurrentFloor());
+						this.setDirection(Direction.IDLE);
+						currState = currState.nextState();
+						break;
 					}
 
-					currState = currState.nextState();
 					break;
-					
 				}
 				
 				case ArriveReqFloor: {
@@ -170,41 +174,13 @@ public class Elevator implements Runnable{
 					
 				}
 				
-				case Moving2: {
-					//Elevator moves in the desired direction to the destination floor
-
-					if(requestData.getDirection() == Direction.UP) {
-						move(currentFloor, Direction.UP, requestData.getRequestedFloor());
-					}
-					else if(requestData.getDirection() == Direction.DOWN) {
-						move(currentFloor, Direction.DOWN, requestData.getRequestedFloor());
-
-					}
-					else {
-						move(currentFloor, Direction.IDLE, requestData.getRequestedFloor());
-					}
-					currState = currState.nextState();
-					break;
-					
-				}
-				
-				case ArriveDestFloor: {
-					currState = currState.nextState();
-					break;
-					
-				}
-				
-				case DestFloorDoorsOpened: {
-					//Elevator sends the info back
-					Date date = new Date(System.currentTimeMillis());
-					scheduler.completeRequest(date, this.currentFloor, true);
-					currState = currState.nextState();
-					break;
-					
-				}
 			}
-			System.out.println("Elevator state: "+currState);
+
+			System.out.println("Current state: "+ currState);
+			
 		}
+		
+
 		
 	}
 	
@@ -213,23 +189,13 @@ public class Elevator implements Runnable{
 	 * @param currentFloor - int representing the floor the elevator is currently one
 	 * @param d - Direction the elevator must move to reach desired floor
 	 * @param desiredFloor - int representing the desired floor that has been requested to go to
+	 * @throws InterruptedException 
 	 */
-	private void move(int currentFloor, Direction d, int desiredFloor) {
-		if(d == Direction.UP) {
-			for(int i = currentFloor; i <desiredFloor; i++) {
-				this.setCurrentFloor(i+1);
-				//System.out.println("At floor: "+ getCurrentFloor());
-			}
-		}
-		else if(d == Direction.DOWN) {
-			for(int i = currentFloor; i > desiredFloor; i--) {
-				this.setCurrentFloor(i-1);
-				//System.out.println("At floor: "+ getCurrentFloor());
-			}
-		}
-		else {
-			this.currentFloor = desiredFloor;
-			//System.out.println("At floor: "+ getCurrentFloor());
-		}
+	private void move() throws InterruptedException {
+		
+		this.updateCurrentFloor();
+		System.out.println("At floor: "+ getCurrentFloor());
+		Thread.sleep(4000);
+		
 	}
 }

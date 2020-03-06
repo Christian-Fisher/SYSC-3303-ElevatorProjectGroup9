@@ -38,7 +38,7 @@ public class FloorSubsystem implements Runnable {
 	 *           iterate through the dataArray and send every item to the scheduler.
 	 */
 	public synchronized void run() {
-		while (true) { // Ensures the thread loops through the whole method infinitely
+		while (true) { // Ensures the thread loops through the whole method infinitly
 			while (!dataArray.isEmpty()) { // Iterates through the linkedlist
 				
 				scheduler.placeRequest(dataArray.pop()); // Sends the request to the scheduler
