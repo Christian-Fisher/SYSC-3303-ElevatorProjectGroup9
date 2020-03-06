@@ -7,11 +7,12 @@ import java.net.UnknownHostException;
 
 public class schedulerUDPThread implements Runnable {
 
-	private final int elePortArray[] = {90, 91, 92};
+	private final int elePortArray[] = { 90, 91, 92, 93 };
 	private DatagramSocket socket;
 	private final int schedulerPort = 99;
 	private InetAddress elevatorAddress;
 	private Scheduler scheduler;
+
 	public schedulerUDPThread(Scheduler scheduler) {
 		this.scheduler = scheduler;
 		try {
@@ -33,9 +34,10 @@ public class schedulerUDPThread implements Runnable {
 				String message[] = new String(recievedPacket.getData()).trim().split(":");
 				int elevatorID = elevatorIDFromPort(recievedPacket.getPort());
 				switch (message[0]) {
-					case "moveComplete": {
-					//	scheduler.completeRequest(elevatorIDFromPort(elevatorID),  Integer.parseInt(message[1]));
-					}
+				case "moveComplete": {
+					// scheduler.completeRequest(elevatorIDFromPort(elevatorID),
+					// Integer.parseInt(message[1]));
+				}
 				}
 
 			} catch (IOException e) {
@@ -46,14 +48,16 @@ public class schedulerUDPThread implements Runnable {
 		}
 
 	}
+
 	private int elevatorIDFromPort(int port) {
-		for(int i=0; i<elePortArray.length; i++) {
-			if(elePortArray[i]==port) {
+		for (int i = 0; i < elePortArray.length; i++) {
+			if (elePortArray[i] == port) {
 				return i;
 			}
 		}
 		return -1;
 	}
+
 	public void moveElevator(int elevatorID, int moveToFloor) {
 		byte[] dataToSend = new String("" + moveToFloor).getBytes();
 		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
@@ -74,9 +78,10 @@ public class schedulerUDPThread implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void toFloor(RequestData data, int elevatorID) {
-		byte[] dataToSend = new String(""+data.getTime() + "," +data.getCurrentFloor() +","+ data.getDirection().toString() + "," +data.getRequestedFloor()).getBytes();
+		byte[] dataToSend = new String("" + data.getTime() + "," + data.getCurrentFloor() + ","
+				+ data.getDirection().toString() + "," + data.getRequestedFloor()).getBytes();
 		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
 				elePortArray[elevatorID]);
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
@@ -94,9 +99,32 @@ public class schedulerUDPThread implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
-	public 
-	
+
+	public RequestData[] pollElevators() {
+		byte[] dataToSend = new String("poll").getBytes();
+		RequestData[] elevatorInfo = new RequestData[elePortArray.length];
+		for (int elevatorID = 0; elevatorID < elePortArray.length; elevatorID++) {
+			DatagramPacket elevatorPollPacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress, elePortArray[elevatorID]);
+			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
+			elevatorInfo[elevatorID] = new RequestData();
+			try {
+				socket.send(elevatorPollPacket);
+				socket.receive(recievedPacket);
+				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");
+				if (elevatorInfoString.length == 2) {
+					if (elevatorInfoString[0].equals("Up")) {
+						
+					}
+				} else {
+					throw new IOException("response is not length 2");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
 }
