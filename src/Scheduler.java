@@ -95,10 +95,9 @@ public class Scheduler {
 		//remove currentFloor from elevatorID's queue
 		requestQueues.get(elevatorID).remove(currentFloor);
 		
-		boolean isDestination = false;
 		for(RequestData r: requests) {
+			//destination floor
 			if(r.getRequestedFloor() == currentFloor) {
-				isDestination = true;
 				toFloor(r);
 				requests.remove(r);
 				//if there are still requests in the elevator queue, send the next one
