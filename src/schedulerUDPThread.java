@@ -7,15 +7,16 @@ import java.net.UnknownHostException;
 
 public class schedulerUDPThread implements Runnable {
 
-	private final int elePortArray[] = { 90, 91, 92, 93 };
+	private final int elePortArray[] = {90, 91, 92};
 	private DatagramSocket socket;
 	private final int schedulerPort = 99;
 	private InetAddress elevatorAddress;
-
-	public schedulerUDPThread() {
+	private Scheduler scheduler;
+	public schedulerUDPThread(Scheduler scheduler) {
+		this.scheduler = scheduler;
 		try {
 			elevatorAddress = InetAddress.getLocalHost(); // TODO Change to other comp's IP
-			socket = new DatagramSocket(schedulerPort);	//Initialize socket to scheduler's port
+			socket = new DatagramSocket(schedulerPort); // Initialize socket to scheduler's port
 		} catch (SocketException | UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -29,9 +30,14 @@ public class schedulerUDPThread implements Runnable {
 			try {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 				socket.receive(recievedPacket);
-				String message = new String(recievedPacket.getData()).trim();
-				
-				
+				String message[] = new String(recievedPacket.getData()).trim().split(":");
+				int elevatorID = elevatorIDFromPort(recievedPacket.getPort());
+				switch (message[0]) {
+					case "moveComplete": {
+					//	scheduler.completeRequest(elevatorIDFromPort(elevatorID),  Integer.parseInt(message[1]));
+					}
+				}
+
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -40,25 +46,57 @@ public class schedulerUDPThread implements Runnable {
 		}
 
 	}
-	
+	private int elevatorIDFromPort(int port) {
+		for(int i=0; i<elePortArray.length; i++) {
+			if(elePortArray[i]==port) {
+				return i;
+			}
+		}
+		return -1;
+	}
 	public void moveElevator(int elevatorID, int moveToFloor) {
-		byte[] dataToSend = new String(""+moveToFloor).getBytes();
-		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress, elePortArray[elevatorID]);
+		byte[] dataToSend = new String("" + moveToFloor).getBytes();
+		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
+				elePortArray[elevatorID]);
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(elevatorMovePacket);
 			socket.receive(recievedPacket);
-			if(new String(recievedPacket.getData()).trim().equals("ack")) {
+			if (new String(recievedPacket.getData()).trim().equals("ack")) {
 				return;
-			}else {
-				//TODO Throw exception or return a bad value?
+			} else {
+				// TODO Throw exception or return a bad value?
+				return;
 			}
-			
-			
-			
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	public void toFloor(RequestData data, int elevatorID) {
+		byte[] dataToSend = new String(""+data.getTime() + "," +data.getCurrentFloor() +","+ data.getDirection().toString() + "," +data.getRequestedFloor()).getBytes();
+		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
+				elePortArray[elevatorID]);
+		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
+		try {
+			socket.send(elevatorMovePacket);
+			socket.receive(recievedPacket);
+			if (new String(recievedPacket.getData()).trim().equals("ack")) {
+				return;
+			} else {
+				// TODO Throw exception or return a bad value?
+				return;
+			}
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public 
+	
 }
