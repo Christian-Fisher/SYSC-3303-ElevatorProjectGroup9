@@ -62,7 +62,6 @@ public class FloorSubsystem implements Runnable {
 	 * then take the read string and convert it into a RequestData stucture.
 	 * 
 	 */
-	@SuppressWarnings("deprecation")
 	private void readDataFromFile() {
 		File inputFile = new File("inputFile.txt"); // Creates the file. For testing the file is inputFile.txt
 		try {
@@ -71,25 +70,19 @@ public class FloorSubsystem implements Runnable {
 				String line = fileReader.nextLine();
 				String[] splitLine = line.split(" "); // Splits each category into an array of strings
 				Direction move = Direction.DOWN;
-				if (splitLine[2].equals("Up")) { // Checks the direction in the request, and adds the RequestData object  to the arrayList based on the Direction
+				if (splitLine[1].equals("Up")) { // Checks the direction in the request, and adds the RequestData object  to the arrayList based on the Direction
 					move = Direction.UP;
 				}
-				Date inputTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(splitLine[0]);
-				Date date = new Date(); 
-				date.setHours(inputTime.getHours());
-				date.setMinutes(inputTime.getMinutes());
-				date.setSeconds(inputTime.getSeconds());
+				int delay = Integer.parseInt(splitLine[0]);
 
 
-				dataArray.add(new RequestData(date, Integer.parseInt(splitLine[1]), move, Integer.parseInt(splitLine[3]))); // Creates the RequestData object with the input from the text file
+				dataArray.add(new RequestData(delay, move, Integer.parseInt(splitLine[2]), Integer.parseInt(splitLine[3]))); // Creates the RequestData object with the input from the text file
 
 			}
 			fileReader.close();// Closes the file
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (ParseException e) {
 			e.printStackTrace();
 		}
 	}

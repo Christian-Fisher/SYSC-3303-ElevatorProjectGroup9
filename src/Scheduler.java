@@ -19,7 +19,7 @@ public class Scheduler {
 	 */
 	public synchronized void placeRequest(RequestData r) {
 		requests.add(r);
-		System.out.println(r.getTime().toString() + " -  Request made at floor #" + r.getCurrentFloor() + 
+		System.out.println(r.getDelay() + " -  Request made at floor #" + r.getCurrentFloor() + 
 				" to go " + r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
 		notifyAll();
 	};
@@ -38,7 +38,7 @@ public class Scheduler {
 			}
 		}
 		RequestData r = requests.peek();
-		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
+		System.out.println("Request at " + r.getDelay() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
 		return r;
 	}
 	
@@ -65,15 +65,15 @@ public class Scheduler {
 	 * @return RequestData - popped RequestData from queue
 	 */
 	
-	public synchronized RequestData completeRequest(Date completionTime, int currentFloor, boolean visitedRequestedFloor) {
+	public synchronized RequestData completeRequest(int completionTime, int currentFloor, boolean visitedRequestedFloor) {
 		// TODO next iteration, a new param will replace all of this. It will have a list of objects consisting of tuples of
 		// datetime of floor visited and visited floor number. This is to ensure elevator has accomplished multiple requests in a certain direction
 		// by looping through this list of tuples and cross referencing with the requests list and popping 
 		
 		//check if elevator reached correct floor as per requests, check if elevator completed after the request time
 		//and check if elevator stopped at request's current floor
-		if(currentFloor == requests.peek().getRequestedFloor() && requests.peek().getTime().compareTo(completionTime) < 0 && visitedRequestedFloor) {
-			System.out.println("Elevator completed request at "+completionTime.toString());
+		if(currentFloor == requests.peek().getRequestedFloor() && requests.peek().getDelay() < completionTime && visitedRequestedFloor) {
+			System.out.println("Elevator completed request at "+completionTime);
 			RequestData completedRequest = requests.pop();
 			completedRequests.add(completedRequest);
 			notifyAll();

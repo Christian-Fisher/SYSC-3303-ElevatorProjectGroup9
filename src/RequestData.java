@@ -19,11 +19,11 @@ public class RequestData implements Serializable {
 	Direction move;
 	private static final long serialVersionUID = 1L;
 	private int currentFloor;
-	private Date time;
+	private int delay;
 	private int requestFloor;
 	
-	public RequestData(Date time, int currentFloor, Direction direction, int requestFloor) {
-		this.time = time;
+	public RequestData(int delay, Direction direction, int currentFloor, int requestFloor) {
+		this.delay = delay;
 		this.currentFloor = currentFloor;
 		this.move = direction;
 		this.requestFloor = requestFloor;
@@ -33,8 +33,8 @@ public class RequestData implements Serializable {
 	 * get the LocalDateTime value
 	 * @return time
 	 */
-	public Date getTime() {
-		return this.time;
+	public int getDelay() {
+		return this.delay;
 	}
 	
 	/**
@@ -85,12 +85,12 @@ public class RequestData implements Serializable {
 			return null;
 		}
 		
-		Date parsedTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(elements.get(0));
-		int parsedCurrentFloor = Integer.parseInt(elements.get(1));
-		Direction parsedDirection = Direction.valueOf(elements.get(2));
+		int parsedDelay = Integer.parseInt(elements.get(0));
+		Direction parsedDirection = Direction.valueOf(elements.get(1));
+		int parsedCurrentFloor = Integer.parseInt(elements.get(2));
 		int parsedRequestFloor = Integer.parseInt(elements.get(3));
 		
-		RequestData rd = new RequestData(parsedTime, parsedCurrentFloor, parsedDirection, parsedRequestFloor);
+		RequestData rd = new RequestData(parsedDelay, parsedDirection, parsedCurrentFloor, parsedRequestFloor);
 		return rd;
 	}
 	
@@ -101,7 +101,7 @@ public class RequestData implements Serializable {
 	@Override
 	public String toString() {
 		String s = new String();
-		s += this.getTime() + " " + this.getCurrentFloor() + " " + this.getDirection() + " " + this.getRequestedFloor();
+		s += this.getDelay() + " " + this.getCurrentFloor() + " " + this.getDirection() + " " + this.getRequestedFloor();
 		return s;
 	}
 	
