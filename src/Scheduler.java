@@ -141,6 +141,7 @@ public class Scheduler {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println(Direction.UP.toString());
 		Scheduler scheduler = new Scheduler();	
 		Thread floorThread = new Thread(new FloorSubsystem(scheduler));	
 		Thread elevatorThread = new Thread(new Elevator(scheduler));

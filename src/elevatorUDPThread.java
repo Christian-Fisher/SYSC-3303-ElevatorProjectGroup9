@@ -5,18 +5,23 @@ import java.net.InetAddress;
 
 public class elevatorUDPThread implements Runnable {
 
-	private final int schedulerPort = 99;
-	private DatagramSocket socket;
-	private InetAddress schedulerAddress;
-	private Elevator elevator;
-	private final String COMMA = ",";
+	private final int schedulerPort = 99;	//Scheduler's port
+	private DatagramSocket socket;	//Socket to send and recieve
+	private InetAddress schedulerAddress;	//IP address of scheduler
+	private Elevator elevator;		//Reference to elevator
+	private final String COMMA = ",";	//byte array containing "ack" to be used when acknowledging messages
 	private final byte[] ackData = "ack".getBytes();	//byte array containing "ack" to be used when acknowledging messages
 
+	/**Constructs the elevatorUDPThread
+	 * 
+	 * @param portNumber initalizes the socket on the given port
+	 * @param elevator	Reference to elevator
+	 */
 	public elevatorUDPThread(int portNumber, Elevator elevator) {
 		this.elevator = elevator;
 		try {
-			socket = new DatagramSocket(portNumber);
-			schedulerAddress = InetAddress.getLocalHost();
+			socket = new DatagramSocket(portNumber);		//Initializes the socket
+			schedulerAddress = InetAddress.getLocalHost();	//TODO LOCALHOST
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -25,13 +30,15 @@ public class elevatorUDPThread implements Runnable {
 	public void run() {
 		while (true) {
 			try {
-				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
-				socket.receive(recievedPacket);
-				String message[] = new String(recievedPacket.getData()).trim().split(",");
+				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Create the packet to receive into
+				socket.receive(recievedPacket); //Receive the incoming packet
+				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 
-				if(!message[0].equals("poll")) {
-					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();
-					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));
+				if(!message[0].equals("poll")) {	//If the command is a poll command
+					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
+					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));	//send response
+				}else {
+					throw new IOException("Unknown command");	//If the command was not recognized, throw exception
 				}
 
 			} catch (IOException e) {
@@ -40,15 +47,18 @@ public class elevatorUDPThread implements Runnable {
 
 		}
 	}
-	
+	/**When the elevator reaches the requested floor, send to scheduler.
+	 * 
+	 * @param currentFloor	floor the elevator is currently at
+	 */
 	public void completeMove(int currentFloor) {
-		byte[] completedMoveData = ("moveComplete:" + currentFloor).getBytes();
+		byte[] completedMoveData = ("moveComplete:" + currentFloor).getBytes();	//Creates moveCompleteMessage
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
-			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));
-			socket.receive(recievedPacket);
-			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {
-				throw new IOException("No Ack recieved on completeMove "  + currentFloor);
+			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message
+			socket.receive(recievedPacket);	//recieves response
+			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If the response is not an ack
+				throw new IOException("No Ack recieved on completeMove "  + currentFloor);	//Throw IOException
 			}
 			
 			
