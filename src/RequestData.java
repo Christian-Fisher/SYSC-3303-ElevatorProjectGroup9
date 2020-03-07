@@ -28,9 +28,18 @@ public class RequestData implements Serializable {
 		this.currentFloor = currentFloor;
 		this.move = direction;
 		this.requestFloor = requestFloor;
-		this.elevatorID = 0;
+		this.elevatorID = -1;
+
 	}
 	
+	public int getElevatorID() {
+		return elevatorID;
+	}
+
+	public void setElevatorID(int elevatorID) {
+		this.elevatorID = elevatorID;
+	}
+
 	/**
 	 * get the LocalDateTime value
 	 * @return time
