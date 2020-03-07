@@ -1,8 +1,10 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -38,8 +40,14 @@ public class FloorSubsystem implements Runnable {
 	 *           iterate through the dataArray and send every item to the scheduler.
 	 */
 	public synchronized void run() {
-		while (true) { // Ensures the thread loops through the whole method infinitly
+		while (true) { // Ensures the thread loops through the whole method infinitely
 			while (!dataArray.isEmpty()) { // Iterates through the linkedlist
+				
+				try {
+					Thread.sleep(dataArray.get(0).getDelay());
+				} catch(InterruptedException ex) {
+					Thread.currentThread().interrupt();
+				}
 				
 				scheduler.placeRequest(dataArray.pop()); // Sends the request to the scheduler
 				
@@ -62,6 +70,7 @@ public class FloorSubsystem implements Runnable {
 	 * then take the read string and convert it into a RequestData stucture.
 	 * 
 	 */
+	@SuppressWarnings("deprecation")
 	private void readDataFromFile() {
 		File inputFile = new File("inputFile.txt"); // Creates the file. For testing the file is inputFile.txt
 		try {
@@ -75,8 +84,7 @@ public class FloorSubsystem implements Runnable {
 				}
 				int delay = Integer.parseInt(splitLine[0]);
 
-
-				dataArray.add(new RequestData(delay, move, Integer.parseInt(splitLine[2]), Integer.parseInt(splitLine[3]))); // Creates the RequestData object with the input from the text file
+				dataArray.add(new RequestData(delay, Integer.parseInt(splitLine[1]), move, Integer.parseInt(splitLine[3]))); // Creates the RequestData object with the input from the text file
 
 			}
 			fileReader.close();// Closes the file
