@@ -52,13 +52,6 @@ public class FloorSubsystem implements Runnable {
 				scheduler.placeRequest(dataArray.pop()); // Sends the request to the scheduler
 				
 			}
-				while (scheduler.isCompletedListEmpty()) { // Check to see if the scheduler has any completed requests to report
-					try {
-						wait(); // Wait until there are requests to report
-					} catch (InterruptedException e) {
-
-					}
-				}
 				System.out.println(scheduler.getCompletedRequest() + " has been completed!"); // Print the request to the screen
 			}
 		}
