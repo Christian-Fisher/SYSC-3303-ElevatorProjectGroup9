@@ -21,12 +21,14 @@ public class RequestData implements Serializable {
 	private int currentFloor;
 	private Date time;
 	private int requestFloor;
+	private int elevatorID;
 	
 	public RequestData(Date time, int currentFloor, Direction direction, int requestFloor) {
 		this.time = time;
 		this.currentFloor = currentFloor;
 		this.move = direction;
 		this.requestFloor = requestFloor;
+		this.elevatorID = 0;
 	}
 	
 	/**
@@ -93,6 +95,15 @@ public class RequestData implements Serializable {
 		RequestData rd = new RequestData(parsedTime, parsedCurrentFloor, parsedDirection, parsedRequestFloor);
 		return rd;
 	}
+	
+	public int getElevatorID() {
+		return elevatorID;
+	}
+
+	public void setElevatorID(int elevatorID) {
+		this.elevatorID = elevatorID;
+	}
+
 	
 	/**
 	 * return the RequestData object as
