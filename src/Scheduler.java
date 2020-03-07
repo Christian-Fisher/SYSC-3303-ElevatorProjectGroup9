@@ -1,7 +1,38 @@
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+
+
+class ElevatorDetail implements Comparable<ElevatorDetail> {
+	int id;
+	Direction direction;
+	Direction desiredDirection;
+	int distance;
+	
+	public ElevatorDetail(int id, Direction direction, Direction desiredDirection, int distance) {
+		this.id = id;
+		this.direction = direction;
+		this.desiredDirection = desiredDirection;
+		this.distance = distance;
+	}
+	
+	public int compareTo(ElevatorDetail otherE) {
+		if(this.desiredDirection != otherE.direction && this.desiredDirection == otherE.direction) {
+			return -1;
+		}
+		if(distance < otherE.distance) {
+			return 1;
+		} else if(distance > otherE.distance) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+}
 
 /**
  * Scheduler is being used as a communication channel from Floor thread to Elevator thread and back again (for now)
@@ -10,10 +41,21 @@ import java.util.LinkedList;
  * @version 1.0
  */
 public class Scheduler {
+	
 	private static LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
 	private LinkedList<RequestData> completedRequests = new LinkedList<RequestData>();
 	schedulerStateMachine currentState = schedulerStateMachine.noRequests;
+
+	//2D Array representing queue for every elevator
+	private ArrayList<ArrayList<Integer>> elevators = new ArrayList<ArrayList<Integer>>();
 	
+	public Scheduler(int numOfElevators) {
+		for(int i=0;i<numOfElevators;i++) {
+			ArrayList<Integer> temp = new ArrayList<Integer>();
+			elevators.add(temp);
+		}
+	}
+
 	/**
 	 * Places a request by added RequestData to requests.
 	 * Notifies available elevators to accept new request
@@ -25,39 +67,75 @@ public class Scheduler {
 		requests.add(r);
 		System.out.println(r.getTime().toString() + " -  Request made at floor #" + r.getCurrentFloor() + 
 				" to go " + r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
+		
+		//int for current and destination floor
+		int c = r.getCurrentFloor();
+		int d = r.getRequestedFloor();
+		
+		//find elevator in elevators list that is closest to int c
+		//List where first element is best
+		//1st integer - Elevator ID, Direction, 2nd integer - distance between elevator floor and int c
+		List<ElevatorDetail> consideredElevators = new ArrayList<ElevatorDetail>();
+		for(int i = 0; i < elevators.size(); i++) {
+			ArrayList<Integer> e = elevators.get(i);
+			Direction elevatorDirection;
+			int distanceFromCurrentFloor = e.get(0) != null ? Math.abs(c - e.get(0)) : Math.abs(c - 0); 
+			 
+			if(e.get(0) != null && e.get(1) != null) {
+				if(e.get(0) - e.get(1) > 0) {
+					elevatorDirection = Direction.DOWN;
+				} else {
+					elevatorDirection = Direction.UP;
+				}
+			} else {
+				elevatorDirection = Direction.IDLE;
+			}
+			
+			ElevatorDetail ed = new ElevatorDetail(i+1, elevatorDirection, r.getDirection(), distanceFromCurrentFloor);
+			consideredElevators.add(ed);
+		}	
+		Collections.sort(consideredElevators); //sort
+		int optimalElevatorID = consideredElevators.get(0).id - 1;
+		r.setElevatorID(optimalElevatorID); //set the elevator id to optimally selected elevator
+		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); //get the elevator's queue
+		optimalElevator.add(c, d); //add floors
+		Collections.sort(optimalElevator); //sort the floors
+		elevators.set(optimalElevatorID, optimalElevator);
+		//LINE TO SEND FIRST FLOOR FROM ELEVATOR QUEUE
+		
 		notifyAll();
 		//The floor subsystem calls the placeRequest function and gives the Scheduler all the requests. 
 		if(currentState.equals(Scheduler.schedulerStateMachine.noRequests)) {
 			currentState = currentState.nextState(); //changes state to uncompletedRequests
 			System.out.println("Scheduler state: "+currentState.toString());
 		}
-	};
+	}
 	
 	/**
 	 * Method invoked by Elevator subsystem to accept new request to fulfill
 	 * @return RequestData - peek of the first RequestData in requests queue
 	 * @throws ParseException
 	 */
-	public synchronized RequestData processRequest() {
-		while(requests.peek()==null) {		//Checks for the case where the list is empty
-			try {
-				wait();						//Waits until the list is not empty
-			}catch(InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		
-		RequestData r = requests.peek();
-		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
-		//the elevators call the processRequest, and they get back one of the requests saved in the scheduler. 
-		//The elevator then processes the request and makes a call to completedRequest when finished. 
-
-		currentState = currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
-
-		System.out.println("Scheduler state: "+currentState.toString());
-		return r;
-		
-	}
+//	public synchronized RequestData processRequest() {
+//		while(requests.peek()==null) {		//Checks for the case where the list is empty
+//			try {
+//				wait();						//Waits until the list is not empty
+//			}catch(InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		RequestData r = requests.peek();
+//		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
+//		//the elevators call the processRequest, and they get back one of the requests saved in the scheduler. 
+//		//The elevator then processes the request and makes a call to completedRequest when finished. 
+//
+//		currentState = currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
+//
+//		System.out.println("Scheduler state: "+currentState.toString());
+//		return r;
+//		
+//	}
 	
 	/**
 	 * 
@@ -82,27 +160,28 @@ public class Scheduler {
 	 * @return RequestData - popped RequestData from queue
 	 */
 	
-	public synchronized RequestData completeRequest(Date completionTime, int currentFloor, boolean visitedRequestedFloor) {
-		// TODO next iteration, a new param will replace all of this. It will have a list of objects consisting of tuples of
-		// datetime of floor visited and visited floor number. This is to ensure elevator has accomplished multiple requests in a certain direction
-		// by looping through this list of tuples and cross referencing with the requests list and popping 
+	public synchronized void completeRequest(int elevatorID, int currentFloor) {
+		//remove currentFloor from elevatorID's queue
+		elevators.get(elevatorID).remove(currentFloor);
 		
-		//check if elevator reached correct floor as per requests, check if elevator completed after the request time
-		//and check if elevator stopped at request's current floor
-		if(currentFloor == requests.peek().getRequestedFloor() && requests.peek().getTime().compareTo(completionTime) < 0 && visitedRequestedFloor) {
-			System.out.println("Elevator completed request at "+completionTime.toString());
-			RequestData completedRequest = requests.pop();
-			completedRequests.add(completedRequest);
-			notifyAll();
-			//Once the elevator has processed the request, it sends back info to the scheduler. The scheduler 
-			// then removes the request from requests, and adds it to the list of completed Requests. 
-			//Once a request has been completed, we should change its state. 
-			currentState = currentState.nextState();
-			System.out.println("Scheduler state: "+currentState.toString());
-
-			return completedRequest;
+		for(RequestData r: requests) {
+			//destination floor
+			if(r.getRequestedFloor() == currentFloor) {
+				toFloor(r);
+				requests.remove(r);
+				//if there are still requests in the elevator queue, send the next one
+				if(elevators.get(elevatorID).size() != 0) {
+					int nextFloor = elevators.get(elevatorID).get(0);
+					moveElevator(elevatorID, nextFloor);
+				}
+			}
+			else {
+				int nextFloor = elevators.get(elevatorID).get(0);
+				moveElevator(elevatorID, nextFloor);
+			}
 		}
-		return null;
+		currentState = currentState.nextState();
+		System.out.println("Scheduler state: "+currentState.toString());
 	}
 	
 	//Enums used to represent the 4 states of the scheduler state machine. 
@@ -141,10 +220,11 @@ public class Scheduler {
 	}
 	
 	public static void main(String[] args) {
-		System.out.println(Direction.UP.toString());
-		Scheduler scheduler = new Scheduler();	
+		int num = 4;
+		Scheduler scheduler = new Scheduler(4);	
 		Thread floorThread = new Thread(new FloorSubsystem(scheduler));	
 		Thread elevatorThread = new Thread(new Elevator(scheduler));
+		
 		//initialize floor thread and passing this scheduler
 		elevatorThread.start();
 		floorThread.start();
