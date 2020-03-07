@@ -41,7 +41,7 @@ class ElevatorDetail implements Comparable<ElevatorDetail> {
  * @version 1.0
  */
 public class Scheduler {
-	
+	private schedulerUDPThread udp = new schedulerUDPThread(this);
 	private static LinkedList<RequestData> requests = new LinkedList<RequestData>(); //behaves as a queue for requests
 	private LinkedList<RequestData> completedRequests = new LinkedList<RequestData>();
 	schedulerStateMachine currentState = schedulerStateMachine.noRequests;
@@ -50,6 +50,8 @@ public class Scheduler {
 	private ArrayList<ArrayList<Integer>> elevators = new ArrayList<ArrayList<Integer>>();
 	
 	public Scheduler(int numOfElevators) {
+		Thread udpThread = new Thread(udp);
+		udpThread.start();
 		for(int i=0;i<numOfElevators;i++) {
 			ArrayList<Integer> temp = new ArrayList<Integer>();
 			elevators.add(temp);
@@ -167,17 +169,17 @@ public class Scheduler {
 		for(RequestData r: requests) {
 			//destination floor
 			if(r.getRequestedFloor() == currentFloor) {
-				toFloor(r);
+				udp.toFloor(r);
 				requests.remove(r);
 				//if there are still requests in the elevator queue, send the next one
 				if(elevators.get(elevatorID).size() != 0) {
 					int nextFloor = elevators.get(elevatorID).get(0);
-					moveElevator(elevatorID, nextFloor);
+					udp.moveElevator(elevatorID, nextFloor);
 				}
 			}
 			else {
 				int nextFloor = elevators.get(elevatorID).get(0);
-				moveElevator(elevatorID, nextFloor);
+				udp.moveElevator(elevatorID, nextFloor);
 			}
 		}
 		currentState = currentState.nextState();

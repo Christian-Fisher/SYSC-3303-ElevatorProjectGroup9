@@ -32,12 +32,38 @@ public class RequestData implements Serializable {
 
 	}
 	
+	public RequestData() {
+		this.time =null;
+		this.currentFloor = -1;
+		this.move =Direction.IDLE;
+		this.requestFloor = -1;
+	}
+	
 	public int getElevatorID() {
 		return elevatorID;
 	}
 
 	public void setElevatorID(int elevatorID) {
 		this.elevatorID = elevatorID;
+	}
+	public Direction getMove() {
+		return move;
+	}
+
+	public void setMove(Direction move) {
+		this.move = move;
+	}
+
+	public int getRequestFloor() {
+		return requestFloor;
+	}
+
+	public void setRequestFloor(int requestFloor) {
+		this.requestFloor = requestFloor;
+	}
+
+	public void setCurrentFloor(int currentFloor) {
+		this.currentFloor = currentFloor;
 	}
 
 	/**
@@ -103,14 +129,6 @@ public class RequestData implements Serializable {
 		
 		RequestData rd = new RequestData(parsedTime, parsedCurrentFloor, parsedDirection, parsedRequestFloor);
 		return rd;
-	}
-	
-	public int getElevatorID() {
-		return elevatorID;
-	}
-
-	public void setElevatorID(int elevatorID) {
-		this.elevatorID = elevatorID;
 	}
 
 	

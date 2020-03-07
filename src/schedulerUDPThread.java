@@ -48,8 +48,8 @@ public class schedulerUDPThread implements Runnable {
 					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
 					RequestData request = new RequestData();	//Creates a new RequestData to store the new request into
 					request.setCurrentFloor(Integer.parseInt(message[1]));	//Sets the currentFloor of request to the floor stored in the message
-					request.setDirection(Direction.valueOf(message[2]));	//Sets the direction to the direction specified in the message
-					request.setRequestedFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
+					request.setMove(Direction.valueOf(message[2]));	//Sets the direction to the direction specified in the message
+					request.setRequestFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
 					scheduler.placeRequest(request);	//The request is sent to the scheduler
 				}
 				}
@@ -137,7 +137,7 @@ public class schedulerUDPThread implements Runnable {
 				socket.receive(recievedPacket);		//recieves the response
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
 				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
-					elevatorInfo[elevatorID].setDirection(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
+					elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
 					elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor
 				} else {
 					throw new IOException("response is not the correct length (2)");	//Recieved the wrong packet
