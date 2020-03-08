@@ -230,7 +230,7 @@ public class Scheduler {
 	public static void main(String[] args) {
 		int numOfElevators = 4;
 		Scheduler scheduler = new Scheduler(numOfElevators);
-		Thread floorThread = new Thread(new FloorSubsystem(scheduler));
+		Thread floorThread = new Thread(new FloorSubsystem());
 		floorThread.setName("floorThread");
 		Thread[] elevatorThreadArray = new Thread[numOfElevators];
 		for (int i = 0; i < numOfElevators; i++) {

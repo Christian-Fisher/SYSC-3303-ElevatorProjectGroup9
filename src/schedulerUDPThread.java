@@ -10,6 +10,7 @@ public class schedulerUDPThread implements Runnable {
 	private final int elePortArray[] = { 90, 91, 92, 93 };	//Array containing all elevator's port number
 	private DatagramSocket socket;	//Socket to send and receive from
 	private final int schedulerPort = 99;	//Port of this thread
+	private DatagramSocket recSocket;
 	private InetAddress elevatorAddress;	//Elevators IP address
 	private InetAddress floorAddress;		//Floors IP Address
 	private final int floorPort = 98;		//Floors Port
@@ -23,7 +24,8 @@ public class schedulerUDPThread implements Runnable {
 		try {
 			elevatorAddress = InetAddress.getLocalHost(); // TODO LOCALHOST
 			floorAddress = InetAddress.getLocalHost();
-			socket = new DatagramSocket(schedulerPort); // Initialize socket to scheduler's port
+			socket = new DatagramSocket(); // Initialize socket to scheduler's port
+			recSocket = new DatagramSocket(schedulerPort);
 		} catch (SocketException | UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -36,7 +38,7 @@ public class schedulerUDPThread implements Runnable {
 		while (true) {
 			try {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Create the packet to receive into
-				socket.receive(recievedPacket);	//Receive the incoming packet
+				recSocket.receive(recievedPacket);	//Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				int elevatorID = elevatorIDFromPort(recievedPacket.getPort());	//Saves the ID of the elevator that sent the request (-1 if an elevator did not send the request)
 				switch (message[0]) {	//The first index will hold the type of message
@@ -90,7 +92,7 @@ public class schedulerUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Creates a packet to recieve the response
 		try {
 			socket.send(elevatorMovePacket);	//Sends the command
-			socket.receive(recievedPacket);		//Recieves the response of the elevator
+			recSocket.receive(recievedPacket);		//Recieves the response of the elevator
 			if (new String(recievedPacket.getData()).trim().equals("ack")) {	//If the response was not an acknowledgement, throw exception
 				return;
 			} else {
@@ -112,7 +114,7 @@ public class schedulerUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(toFloorPacket);	//Sends the packet
-			socket.receive(recievedPacket);	//Recieves the response
+			recSocket.receive(recievedPacket);	//Recieves the response
 			if (!new String(recievedPacket.getData()).trim().equals("ack")) {	//If the response was not an acknowledgement
 				throw new IOException("not ack recieved");	//Throw not ack recieved exception
 			}
@@ -128,6 +130,7 @@ public class schedulerUDPThread implements Runnable {
  * @return	Array of RequetData that contains the direction and currentFloor of all elevators
  */
 	public RequestData[] pollElevators() {
+		try {
 		byte[] dataToSend = new String("poll").getBytes(); //Creates the poll message
 		RequestData[] elevatorInfo = new RequestData[elePortArray.length];	//Creates an array of RequestData with the length = numOfElevators
 		for (int elevatorID = 0; elevatorID < elePortArray.length; elevatorID++) {	//For each elevator
@@ -135,23 +138,26 @@ public class schedulerUDPThread implements Runnable {
 					elePortArray[elevatorID]);		//Create a new packet to send to the elevator
 			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Packet to recieve into
 			elevatorInfo[elevatorID] = new RequestData();	//initialize the RequestData at the current index
-			try {
+		
+				
 				socket.send(elevatorPollPacket);	//Sends the poll command
-				socket.receive(recievedPacket);		//recieves the response
+				recSocket.receive(recievedPacket);		//recieves the response
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
-				System.out.println("Poll recieved: " + elevatorInfoString[0]);
+				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1]  );
 				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
 					elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
 					elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor
 				} else {
 					throw new IOException("response is not the correct length (2)");	//Recieved the wrong packet
 				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
 		}
-		return elevatorInfo;	//Return the RequestData array
+		return elevatorInfo;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 }

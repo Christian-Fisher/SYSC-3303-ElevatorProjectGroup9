@@ -8,6 +8,7 @@ public class floorSubsystemThread implements Runnable {
 	private final int floorPort = 98;	//FloorUDP port
 	private final int schedulerPort = 99;	//Scheduler's port
 	private DatagramSocket socket;	//Socket to send and recieve
+	private DatagramSocket recSocket;
 	private InetAddress schedulerAddress;	//Address of scheduler
 	private final String COMMA = ",";	//byte array containing "ack" to be used when acknowledging messages
 	private final byte[] ackData = "ack".getBytes();	//byte array containing "ack" to be used when acknowledging messages
@@ -19,7 +20,8 @@ public class floorSubsystemThread implements Runnable {
 	public floorSubsystemThread(FloorSubsystem floor) {
 		this.floor = floor;
 		try {
-			socket = new DatagramSocket(floorPort);
+			socket = new DatagramSocket();
+			recSocket = new DatagramSocket(floorPort);
 			schedulerAddress = InetAddress.getLocalHost(); // TODO LOCALHOST
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -32,10 +34,10 @@ public class floorSubsystemThread implements Runnable {
 		while(true) {
 			try {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//create packet to recieve into
-				socket.receive(recievedPacket);	//Recieve command
+				recSocket.receive(recievedPacket);	//Recieve command
 				String message[] = new String(recievedPacket.getData()).trim().split(",");		//Convert to readable format
 				if(message[0].equals("completedRequest")) {		//If the command is a completedRequest
-					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));//Acknowledge the scheduler
+					socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));//Acknowledge the scheduler
 					System.out.println("Completed Request from floor: "+ message[1] + " to floor: " + message[2]);	//Print the request
 				}else {
 					throw new IOException("Unknown Command");	//If the command is unknown throw exception
@@ -58,7 +60,7 @@ public class floorSubsystemThread implements Runnable {
 					schedulerPort);	//Creates packet to send to scheduler
 			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 			socket.send(requestPacket);	//Sends packet
-			socket.receive(recievedPacket);	//Recieves packet
+			recSocket.receive(recievedPacket);	//Recieves packet
 			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If recieved packet is not an acknowledgement
 				throw new IOException("not ack recieved");	//throw Exception
 			}

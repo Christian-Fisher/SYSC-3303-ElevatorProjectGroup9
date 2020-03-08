@@ -7,6 +7,7 @@ public class elevatorUDPThread implements Runnable {
 	private final int elePortArray[] = { 90, 91, 92, 93 };
 	private final int schedulerPort = 99;	//Scheduler's port
 	private DatagramSocket socket;	//Socket to send and recieve
+	private DatagramSocket recSocket;
 	private InetAddress schedulerAddress;	//IP address of scheduler
 	private Elevator elevator;		//Reference to elevator
 	private final String COMMA = ",";	//byte array containing "ack" to be used when acknowledging messages
@@ -20,7 +21,8 @@ public class elevatorUDPThread implements Runnable {
 	public elevatorUDPThread(int portNumber, Elevator elevator) {
 		this.elevator = elevator;
 		try {
-			socket = new DatagramSocket(elePortArray[portNumber]);		//Initializes the socket
+			recSocket = new DatagramSocket(elePortArray[portNumber]);
+			socket = new DatagramSocket();		//Initializes the socket
 			schedulerAddress = InetAddress.getLocalHost();	//TODO LOCALHOST
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -31,7 +33,7 @@ public class elevatorUDPThread implements Runnable {
 		while (true) {
 			try {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Create the packet to receive into
-				socket.receive(recievedPacket); //Receive the incoming packet
+				recSocket.receive(recievedPacket); //Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 
 				if(message[0].equals("poll")) {	//If the command is a poll command
@@ -57,7 +59,7 @@ public class elevatorUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message
-			socket.receive(recievedPacket);	//recieves response
+			recSocket.receive(recievedPacket);	//recieves response
 			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If the response is not an ack
 				throw new IOException("No Ack recieved on completeMove "  + currentFloor);	//Throw IOException
 			}

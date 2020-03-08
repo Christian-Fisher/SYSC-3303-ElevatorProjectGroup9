@@ -19,12 +19,14 @@ import java.util.Scanner;
  */
 public class FloorSubsystem implements Runnable {
 
-	private Scheduler scheduler; // Contains the reference to the scheduler
+	 // Contains the reference to the scheduler
 	LinkedList<RequestData> dataArray = new LinkedList<RequestData>(); // Holds all the data read from the file
-
-	public FloorSubsystem(Scheduler scheduler) {
-
-		this.scheduler = scheduler;
+	floorSubsystemThread udpFloorSubsystemThread;
+	public FloorSubsystem() {
+		this.udpFloorSubsystemThread = new floorSubsystemThread(this);
+		Thread floorUDP = new Thread(udpFloorSubsystemThread);
+		floorUDP.setName("Floor UDP");
+		floorUDP.start();
 		readDataFromFile();
 	}
 	/**
@@ -40,21 +42,17 @@ public class FloorSubsystem implements Runnable {
 	 *           iterate through the dataArray and send every item to the scheduler.
 	 */
 	public synchronized void run() {
-		while (true) { // Ensures the thread loops through the whole method infinitely
 			while (!dataArray.isEmpty()) { // Iterates through the linkedlist
 				
 				try {
-					Thread.sleep(dataArray.get(0).getDelay());
+					Thread.sleep(dataArray.get(0).getDelay()*1000);
 				} catch(InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
-				
-				scheduler.placeRequest(dataArray.pop()); // Sends the request to the scheduler
-				
+				udpFloorSubsystemThread.sendRequest(dataArray.pop());
 			}
-				System.out.println(scheduler.getCompletedRequest() + " has been completed!"); // Print the request to the screen
+
 			}
-		}
 
 	
 

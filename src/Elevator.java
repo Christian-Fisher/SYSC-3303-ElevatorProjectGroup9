@@ -22,6 +22,7 @@ public class Elevator implements Runnable {
 		dir = Direction.IDLE;
 		udp = new elevatorUDPThread(elID, this);
 		Thread udpThread = new Thread(udp);
+		udpThread.setName("Elevator: " +elID);
 		udpThread.start();
 	}
 
