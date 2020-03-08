@@ -8,7 +8,7 @@
 ## Iteration 3 Roles
 Dhyan: created Scheduler class and resolve bugs
 
-Christian: set up the UDP process. 
+Christian: created the UDP threads for the elevator, floorSubsytem and the scheduler classes. 
 
 Nicholas: Modified the states for the elevator's state machine and updated the FloorSubsystem to read the new input file.
 
@@ -29,3 +29,8 @@ AllTests - contains various test cases for unit testing
 
 Direction - class containing the enum for a movement of an elevator 
 
+elevatorUDPThread - class used to send and receive UDP for the elevator. Used for communication amongst the elevator, scheduler and the floor subsystem. 
+
+schedulerUDPThread - class used to send and receive UDP for the scheduler. Used for communication amongst the elevator, scheduler and the floor subsystem. 
+
+floorSubsystemThread - class used to send and receive UDP for the floor.  Used for communication amongst the elevator, scheduler and the floor subsystem. 
