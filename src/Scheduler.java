@@ -75,37 +75,30 @@ public class Scheduler {
 		int d = r.getRequestedFloor();
 		
 		//find elevator in elevators list that is closest to int c
-		//List where first element is best
-		//1st integer - Elevator ID, Direction, 2nd integer - distance between elevator floor and int c
+		//List where first element is best. Will be sorted based on request's direction and floor
 		List<ElevatorDetail> consideredElevators = new ArrayList<ElevatorDetail>();
-		for(int i = 0; i < elevators.size(); i++) {
-			ArrayList<Integer> e = elevators.get(i);
-			Direction elevatorDirection;
-			int distanceFromCurrentFloor = e.get(0) != null ? Math.abs(c - e.get(0)) : Math.abs(c - 0); 
-			 
-			if(e.get(0) != null && e.get(1) != null) {
-				if(e.get(0) - e.get(1) > 0) {
-					elevatorDirection = Direction.DOWN;
-				} else {
-					elevatorDirection = Direction.UP;
-				}
-			} else {
-				elevatorDirection = Direction.IDLE;
-			}
-			
-			ElevatorDetail ed = new ElevatorDetail(i+1, elevatorDirection, r.getDirection(), distanceFromCurrentFloor);
+		RequestData[] polledElevators = udp.pollElevators(); //get the in processing request data for every elevator
+		
+		for(int i = 0; i < polledElevators.length; i++) {
+			int distanceFromCurrentFloor = Math.abs(c - polledElevators[i].getCurrentFloor()); 
+
+			ElevatorDetail ed = new ElevatorDetail(polledElevators[i].getElevatorID(), 
+					polledElevators[i].getDirection(), r.getDirection(), distanceFromCurrentFloor);
 			consideredElevators.add(ed);
 		}	
-		Collections.sort(consideredElevators); //sort
-		int optimalElevatorID = consideredElevators.get(0).id - 1;
+		Collections.sort(consideredElevators); //sort the elevators
+		int optimalElevatorID = consideredElevators.get(0).id;
+		
 		r.setElevatorID(optimalElevatorID); //set the elevator id to optimally selected elevator
 		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); //get the elevator's queue
+		
 		optimalElevator.add(c, d); //add floors
+		
 		Collections.sort(optimalElevator); //sort the floors
 		elevators.set(optimalElevatorID, optimalElevator);
-		//LINE TO SEND FIRST FLOOR FROM ELEVATOR QUEUE
 		
-		notifyAll();
+		udp.moveElevator(optimalElevatorID, optimalElevator.get(0)); //tell chosen elevator to go to first request floor
+		
 		//The floor subsystem calls the placeRequest function and gives the Scheduler all the requests. 
 		if(currentState.equals(Scheduler.schedulerStateMachine.noRequests)) {
 			currentState = currentState.nextState(); //changes state to uncompletedRequests
