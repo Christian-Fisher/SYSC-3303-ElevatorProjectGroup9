@@ -40,12 +40,12 @@ public class schedulerUDPThread implements Runnable {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Create the packet to receive into
 				recSocket.receive(recievedPacket);	//Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
-				int elevatorID = elevatorIDFromPort(recievedPacket.getPort());	//Saves the ID of the elevator that sent the request (-1 if an elevator did not send the request)
 				switch (message[0]) {	//The first index will hold the type of message
 				case "moveComplete": {	//If the message was a moveComplete message from an elevator
 					System.out.println("moveCompelte Recieved");
-					scheduler.completeRequest(elevatorIDFromPort(elevatorID), Integer.parseInt(message[1]));	//Notify the scheduler that the elevator reached it's destination
+					scheduler.completeRequest(Integer.parseInt(message[1]), Integer.parseInt(message[2]));	//Notify the scheduler that the elevator reached it's destination
 					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
+					break;
 				}
 				case "newRequest": {		//The message was a new request from the floor subsystem
 					System.out.println("newRequest Recieved");
@@ -55,7 +55,7 @@ public class schedulerUDPThread implements Runnable {
 					request.setRequestFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
 					scheduler.placeRequest(request);	//The request is sent to the scheduler
 					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
-
+					break;
 				}
 				}
 			}catch (IOException e) {
@@ -67,19 +67,6 @@ public class schedulerUDPThread implements Runnable {
 
 	}
 
-	/**
-	 *  Private method which will be used to determine the elevator ID based on the port number of the message receievd
-	 * @param port contains the port number
-	 * @return integer containing the ID of the elevator (OR -1 to indicate it was not an elevator port)
-	 */
-	private int elevatorIDFromPort(int port) {
-		for (int i = 0; i < elePortArray.length; i++) {	//Loops through the elevatorPort array
-			if (elePortArray[i] == port) {	//If the port is in the elevator array
-				return i;		//return it's index
-			}
-		}
-		return -1;		//Else, it was not an elevator that sent the message
-	}
 /**
  * Sends A UDP message to a specified elevator, commanding it to move a specified floor
  * @param elevatorID	ID of the elevator to move

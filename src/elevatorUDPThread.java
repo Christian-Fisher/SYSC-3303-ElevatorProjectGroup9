@@ -40,8 +40,13 @@ public class elevatorUDPThread implements Runnable {
 					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
 					System.out.println("Poll: Sending: " +pollResponse);
 					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));	//send response
-				}else {
-					throw new IOException("Unknown command: " + message[0]);	//If the command was not recognized, throw exception
+				}else if(message[0].equals("move")) {
+					elevator.setRequestedFloor(Integer.parseInt(message[1]));
+					System.out.println("set req floor to "+ Integer.parseInt(message[1]));
+					socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));
+				}
+				else {
+					throw new IOException("Elevator: Unknown command: " + message[0]);	//If the command was not recognized, throw exception
 				}
 
 			} catch (IOException e) {
@@ -54,8 +59,8 @@ public class elevatorUDPThread implements Runnable {
 	 * 
 	 * @param currentFloor	floor the elevator is currently at
 	 */
-	public void completeMove(int currentFloor) {
-		byte[] completedMoveData = ("moveComplete:" + currentFloor).getBytes();	//Creates moveCompleteMessage
+	public void completeMove(int elID, int currentFloor) {
+		byte[] completedMoveData = ("moveComplete" +COMMA+elID+COMMA+ currentFloor).getBytes();	//Creates moveCompleteMessage
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message

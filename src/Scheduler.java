@@ -93,8 +93,8 @@ public class Scheduler {
 		r.setElevatorID(optimalElevatorID); // set the elevator id to optimally selected elevator
 		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); // get the elevator's queue
 
-		optimalElevator.add(c, d); // add floors
-
+		optimalElevator.add(c); // add floors
+		optimalElevator.add(d);
 		Collections.sort(optimalElevator); // sort the floors
 		elevators.set(optimalElevatorID, optimalElevator);
 
@@ -169,24 +169,27 @@ public class Scheduler {
 
 	public synchronized void completeRequest(int elevatorID, int currentFloor) {
 		// remove currentFloor from elevatorID's queue
-		elevators.get(elevatorID).remove(currentFloor);
-
+		int indexOfCurrentFloor = elevators.get(elevatorID).indexOf(currentFloor);
+		elevators.get(elevatorID).remove(indexOfCurrentFloor);
 		for (RequestData r : requests) {
 			// destination floor
 			if (r.getRequestedFloor() == currentFloor) {
 				udp.toFloor(r);
 				requests.remove(r);
+				currentState = currentState.nextState();
 				// if there are still requests in the elevator queue, send the next one
 				if (elevators.get(elevatorID).size() != 0) {
 					int nextFloor = elevators.get(elevatorID).get(0);
+					System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
 					udp.moveElevator(elevatorID, nextFloor);
 				}
 			} else {
 				int nextFloor = elevators.get(elevatorID).get(0);
+				System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
 				udp.moveElevator(elevatorID, nextFloor);
 			}
 		}
-		currentState = currentState.nextState();
+		
 		System.out.println("Scheduler state: " + currentState.toString());
 	}
 

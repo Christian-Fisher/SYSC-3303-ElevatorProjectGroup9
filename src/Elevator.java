@@ -10,6 +10,7 @@ public class Elevator implements Runnable {
 	private elevatorUDPThread udp;
 	private int currentFloor, requestedFloor;
 	private Direction dir;
+	private int elID;
 
 	/**
 	 * Constructor for the Elevator class
@@ -17,12 +18,13 @@ public class Elevator implements Runnable {
 	 * @param scheduler - A Scheduler to coordinate when work must be done
 	 */
 	public Elevator(int elID) {
-		requestedFloor=0;
+		this.elID = elID;
+		requestedFloor = 0;
 		currentFloor = 0;
 		dir = Direction.IDLE;
 		udp = new elevatorUDPThread(elID, this);
 		Thread udpThread = new Thread(udp);
-		udpThread.setName("Elevator: " +elID);
+		udpThread.setName("Elevator: " + elID);
 		udpThread.start();
 	}
 
@@ -31,7 +33,7 @@ public class Elevator implements Runnable {
 	 * 
 	 * @return int - the current floor
 	 */
-	public synchronized int getCurrentFloor() {
+	public int getCurrentFloor() {
 		return this.currentFloor;
 	}
 
@@ -39,7 +41,7 @@ public class Elevator implements Runnable {
 	 * Update (increment / decrement) currentFloor based on direction elevator is
 	 * travelling
 	 */
-	public synchronized void updateCurrentFloor() {
+	public void updateCurrentFloor() {
 		if (this.getDirection() == Direction.UP) {
 			this.currentFloor++;
 		} else if (this.getDirection() == Direction.DOWN) {
@@ -48,19 +50,20 @@ public class Elevator implements Runnable {
 		}
 	}
 
-	public int getRequestedFloor() {
+	public synchronized int getRequestedFloor() {
 		return requestedFloor;
 	}
 
-	public void setRequestedFloor(int requestedFloor) {
+	public synchronized void setRequestedFloor(int requestedFloor) {
 		this.requestedFloor = requestedFloor;
+		System.out.println("set req to " + requestedFloor);
 	}
 
 	/**
 	 * 
 	 * @return Direction elevator is travelling
 	 */
-	public synchronized Direction getDirection() {
+	public Direction getDirection() {
 		return this.dir;
 	}
 
@@ -69,7 +72,7 @@ public class Elevator implements Runnable {
 	 * 
 	 * @param d (Direction)
 	 */
-	public synchronized void setDirection(Direction d) {
+	public void setDirection(Direction d) {
 		this.dir = d;
 	}
 
@@ -134,11 +137,19 @@ public class Elevator implements Runnable {
 
 			case CurrFloorDoorsClosed: {
 				// Elevator calling the scheduler
-				if(this.getCurrentFloor()!=this.getRequestedFloor()) {
-				currState = currState.nextState();
-				}
-				break;
+					System.out.println("req: " + this.getRequestedFloor());
+					if (this.getCurrentFloor() != this.getRequestedFloor()) {
+						currState = currState.nextState();
+						break;
+					}
+					try {
+						Thread.sleep(250);
+					}catch(InterruptedException e) {
+						
+					}
+					
 				
+				break;
 			}
 
 			case Moving: {
@@ -176,13 +187,14 @@ public class Elevator implements Runnable {
 
 			case ReqFloorDoorsOpened: {
 				currState = currState.nextState();
+				udp.completeMove(elID, currentFloor);
 				break;
 
 			}
 
 			}
-			if(currState!=ElevatorStateMachine.CurrFloorDoorsClosed) {
-			System.out.println("Current state: " + currState);
+			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
+				System.out.println("Current state: " + currState);
 			}
 
 		}
@@ -203,7 +215,7 @@ public class Elevator implements Runnable {
 
 		this.updateCurrentFloor();
 		System.out.println("At floor: " + getCurrentFloor());
-		Thread.sleep(4000);
+		Thread.sleep(2000);
 
 	}
 }
