@@ -5,16 +5,16 @@
 2. Run project from Scheduler's main
 3. To run tests, run `alltests.java` as a JUnit Test 
 
-## Iteration 2 Roles
-Dhyan: created test cases
+## Iteration 1 Roles
+Dhyan: created Scheduler class and resolve bugs
 
-Christian: created the state machine diagram and sequence diagram. Updated the class diagram
+Christian: created FloorSubsystem class and reading input file
 
-Nicholas: worked on implementing Elevator as state machine.
+Nicholas: created a custom data structure `RequestData` to store the necessary information of input
 
-Sonia: worked on implementing Elevator as state machine. Created the state machine diagram and sequence diagram.
+Sonia: created Elevator subsystem and created a movement impersonation 
 
-Karan: Implemented the Scheduler as a state machine
+Karan: created UML diagrams and test cases
 
 ### Files:
 RequestData - a data structure for storing and accessing time, current floor, destination floor and movement of a request
