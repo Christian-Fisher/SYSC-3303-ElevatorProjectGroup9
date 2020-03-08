@@ -13,11 +13,11 @@ class allTests {
 
 	@BeforeEach
 	void setUp() throws Exception {
-		scheduler = new Scheduler();	
-		floorSubsystem = new FloorSubsystem(scheduler);
-		elevator = new Elevator(scheduler);
-		floorThread = new Thread(new FloorSubsystem(scheduler));	
-		elevatorThread = new Thread(new Elevator(scheduler));
+//		scheduler = new Scheduler(4);	
+//		floorSubsystem = new FloorSubsystem(scheduler);
+//		elevator = new Elevator(scheduler);
+//		floorThread = new Thread(new FloorSubsystem(scheduler));	
+//		elevatorThread = new Thread(new Elevator(scheduler));
 	}
 	
 	/**
@@ -45,7 +45,7 @@ class allTests {
 	 */
 	@Test
 	void testSetCurrentFloor() {
-		elevator.setCurrentFloor(2);
+//		elevator.setCurrentFloor(2);
 		assertEquals(2,elevator.getCurrentFloor(),"The floor should now be set to 2.");
 	}
 	

@@ -4,7 +4,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class elevatorUDPThread implements Runnable {
-
+	private final int elePortArray[] = { 90, 91, 92, 93 };
 	private final int schedulerPort = 99;	//Scheduler's port
 	private DatagramSocket socket;	//Socket to send and recieve
 	private InetAddress schedulerAddress;	//IP address of scheduler
@@ -20,7 +20,7 @@ public class elevatorUDPThread implements Runnable {
 	public elevatorUDPThread(int portNumber, Elevator elevator) {
 		this.elevator = elevator;
 		try {
-			socket = new DatagramSocket(portNumber);		//Initializes the socket
+			socket = new DatagramSocket(elePortArray[portNumber]);		//Initializes the socket
 			schedulerAddress = InetAddress.getLocalHost();	//TODO LOCALHOST
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -34,11 +34,12 @@ public class elevatorUDPThread implements Runnable {
 				socket.receive(recievedPacket); //Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 
-				if(!message[0].equals("poll")) {	//If the command is a poll command
+				if(message[0].equals("poll")) {	//If the command is a poll command
 					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
+					System.out.println("Poll: Sending: " +pollResponse);
 					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));	//send response
 				}else {
-					throw new IOException("Unknown command");	//If the command was not recognized, throw exception
+					throw new IOException("Unknown command: " + message[0]);	//If the command was not recognized, throw exception
 				}
 
 			} catch (IOException e) {

@@ -19,12 +19,12 @@ public class RequestData implements Serializable {
 	Direction move;
 	private static final long serialVersionUID = 1L;
 	private int currentFloor;
-	private Date time;
+	private int delay;
 	private int requestFloor;
 	private int elevatorID;
 	
-	public RequestData(Date time, int currentFloor, Direction direction, int requestFloor) {
-		this.time = time;
+	public RequestData(int delay, int currentFloor, Direction direction, int requestFloor) {
+		this.delay = delay;
 		this.currentFloor = currentFloor;
 		this.move = direction;
 		this.requestFloor = requestFloor;
@@ -33,7 +33,7 @@ public class RequestData implements Serializable {
 	}
 	
 	public RequestData() {
-		this.time =null;
+		this.delay =0;
 		this.currentFloor = -1;
 		this.move =Direction.IDLE;
 		this.requestFloor = -1;
@@ -70,8 +70,8 @@ public class RequestData implements Serializable {
 	 * get the LocalDateTime value
 	 * @return time
 	 */
-	public Date getTime() {
-		return this.time;
+	public int getDelay() {
+		return this.delay;
 	}
 	
 	/**
@@ -102,46 +102,8 @@ public class RequestData implements Serializable {
 	public Direction getDirection() {
 		return this.move;
 	}
-	
-	/**
-	 * Take a string as a parameter, parse it and create
-	 * a new RequestData object
-	 * @param str
-	 * @throws ParseException
-	 */
-	public RequestData parse(String str) throws ParseException {
-		StringTokenizer requestData = new StringTokenizer(str, " ");
-		ArrayList<String> elements = new ArrayList<>();
-		
-		while(requestData.hasMoreTokens()) {
-			elements.add(requestData.nextToken());
-		}
-		
-		if(elements.size() != 4) {
-			System.out.println("There must be 4 elements to create new RequestData object");
-			return null;
-		}
-		
-		Date parsedTime = new SimpleDateFormat("HH:mm:ss.SSS").parse(elements.get(0));
-		int parsedCurrentFloor = Integer.parseInt(elements.get(1));
-		Direction parsedDirection = Direction.valueOf(elements.get(2));
-		int parsedRequestFloor = Integer.parseInt(elements.get(3));
-		
-		RequestData rd = new RequestData(parsedTime, parsedCurrentFloor, parsedDirection, parsedRequestFloor);
-		return rd;
-	}
 
-	
-	/**
-	 * return the RequestData object as
-	 * a string value
-	 */
-	@Override
-	public String toString() {
-		String s = new String();
-		s += this.getTime() + " " + this.getCurrentFloor() + " " + this.getDirection() + " " + this.getRequestedFloor();
-		return s;
-	}
+
 	
 
 }

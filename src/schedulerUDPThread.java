@@ -41,16 +41,19 @@ public class schedulerUDPThread implements Runnable {
 				int elevatorID = elevatorIDFromPort(recievedPacket.getPort());	//Saves the ID of the elevator that sent the request (-1 if an elevator did not send the request)
 				switch (message[0]) {	//The first index will hold the type of message
 				case "moveComplete": {	//If the message was a moveComplete message from an elevator
-					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
+					System.out.println("moveCompelte Recieved");
 					scheduler.completeRequest(elevatorIDFromPort(elevatorID), Integer.parseInt(message[1]));	//Notify the scheduler that the elevator reached it's destination
+					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
 				}
 				case "newRequest": {		//The message was a new request from the floor subsystem
-					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
+					System.out.println("newRequest Recieved");
 					RequestData request = new RequestData();	//Creates a new RequestData to store the new request into
 					request.setCurrentFloor(Integer.parseInt(message[1]));	//Sets the currentFloor of request to the floor stored in the message
 					request.setMove(Direction.valueOf(message[2]));	//Sets the direction to the direction specified in the message
 					request.setRequestFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
 					scheduler.placeRequest(request);	//The request is sent to the scheduler
+					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
+
 				}
 				}
 			}catch (IOException e) {
@@ -136,6 +139,7 @@ public class schedulerUDPThread implements Runnable {
 				socket.send(elevatorPollPacket);	//Sends the poll command
 				socket.receive(recievedPacket);		//recieves the response
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
+				System.out.println("Poll recieved: " + elevatorInfoString[0]);
 				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
 					elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
 					elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor
