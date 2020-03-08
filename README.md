@@ -5,16 +5,16 @@
 2. Run project from Scheduler's main
 3. To run tests, run `alltests.java` as a JUnit Test 
 
-## Iteration 1 Roles
+## Iteration 3 Roles
 Dhyan: created Scheduler class and resolve bugs
 
-Christian: created FloorSubsystem class and reading input file
+Christian: set up the UDP process. 
 
-Nicholas: created a custom data structure `RequestData` to store the necessary information of input
+Nicholas: Modified the states for the elevator's state machine and updated the FloorSubsystem to read the new input file.
 
 Sonia: created Elevator subsystem and created a movement impersonation 
 
-Karan: created UML diagrams and test cases
+Karan: Updated the input file for the test cases for iteration #3, wrote the reflection and updated the diagrams. 
 
 ### Files:
 RequestData - a data structure for storing and accessing time, current floor, destination floor and movement of a request
