@@ -6,13 +6,13 @@
 3. To run tests, run `alltests.java` as a JUnit Test 
 
 ## Iteration 3 Roles
-Dhyan: created Scheduler class and resolve bugs
+Dhyan: Modified the scheduler, so it can place requests from the floorSubsystem according to the outline for iteration #3 through the placeRequest function. 
 
 Christian: created the UDP threads for the elevator, floorSubsytem and the scheduler classes. 
 
 Nicholas: Modified the states for the elevator's state machine and updated the FloorSubsystem to read the new input file.
 
-Sonia: created Elevator subsystem and created a movement impersonation 
+Sonia: Modified the elevator and scheduler classes to implement new functionality. Changed the completedRequest function 
 
 Karan: Updated the input file for the test cases for iteration #3, wrote the reflection and updated the diagrams. 
 
