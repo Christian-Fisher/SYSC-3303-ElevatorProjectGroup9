@@ -11,6 +11,10 @@ public class Elevator implements Runnable {
 	private int currentFloor, requestedFloor;
 	private Direction dir;
 	private int elID;
+	public int getElID() {
+		return elID;
+	}
+
 	// intialize elevator state to current floor with doors closed
 	private ElevatorStateMachine currState;
 
@@ -184,7 +188,7 @@ public class Elevator implements Runnable {
 				}
 			}
 			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
-				System.out.println("Current state: " + currState);
+				System.out.println("Elevator "+elID+": Current state: " + currState);
 			}
 		}
 	}
@@ -202,7 +206,7 @@ public class Elevator implements Runnable {
 	private void move() throws InterruptedException {
 
 		this.updateCurrentFloor();
-		System.out.println("At floor: " + getCurrentFloor());
+		System.out.println("Elevator "+elID+": At floor: " + getCurrentFloor());
 		Thread.sleep(2000);
 
 	}

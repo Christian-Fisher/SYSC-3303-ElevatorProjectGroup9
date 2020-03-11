@@ -38,12 +38,14 @@ public class elevatorUDPThread implements Runnable {
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				if(message[0].equals("poll")) {	//If the command is a poll command
 					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
-					System.out.println("Poll: Sending: " +pollResponse);
+					System.out.println("Poll: "+elevator.getElID()+" Sending: " +pollResponse);
 					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));	//send response
 				}else if(message[0].equals("move")) {
+					//socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));
 					elevator.setRequestedFloor(Integer.parseInt(message[1]));
 					System.out.println("set req floor to "+ Integer.parseInt(message[1]));
-					socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));
+					
+		
 				}
 				else {
 					throw new IOException("Elevator: Unknown command: " + message[0]);	//If the command was not recognized, throw exception
@@ -64,11 +66,11 @@ public class elevatorUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message
-			recSocket.receive(recievedPacket);	//recieves response
+			/*recSocket.receive(recievedPacket);	//recieves response
 
 			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If the response is not an ack
 				throw new IOException("No Ack recieved on completeMove "  + currentFloor);	//Throw IOException
-			}			
+			}		*/	
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

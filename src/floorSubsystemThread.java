@@ -62,10 +62,10 @@ public class floorSubsystemThread implements Runnable {
 					schedulerPort);	//Creates packet to send to scheduler
 			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 			socket.send(requestPacket);	//Sends packet
-			recSocket.receive(recievedPacket);	//Recieves packet
+			/*recSocket.receive(recievedPacket);	//Recieves packet
 			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If recieved packet is not an acknowledgement
 				throw new IOException("not ack recieved");	//throw Exception
-			}
+			}*/
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
