@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 public class floorSubsystemThread implements Runnable {
 	private FloorSubsystem floor;	//Reference to Floor
@@ -36,11 +37,12 @@ public class floorSubsystemThread implements Runnable {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//create packet to recieve into
 				recSocket.receive(recievedPacket);	//Recieve command
 				String message[] = new String(recievedPacket.getData()).trim().split(",");		//Convert to readable format
-				if(message[0].equals("completedRequest")) {		//If the command is a completedRequest
+				if(message[0].equals("completeRequest")) {		//If the command is a completedRequest
 					socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));//Acknowledge the scheduler
 					System.out.println("Completed Request from floor: "+ message[1] + " to floor: " + message[2]);	//Print the request
 				}else {
-					throw new IOException("Unknown Command");	//If the command is unknown throw exception
+					System.out.println("Unknown Command " + Arrays.toString(message));	//If the command is unknown throw exception
+					throw new IOException("Unknown Command ");	//If the command is unknown throw exception
 				}
 			}catch(IOException e) {
 				e.printStackTrace();

@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Arrays;
 
 public class elevatorUDPThread implements Runnable {
 	private final int elePortArray[] = { 90, 91, 92, 93 };
@@ -35,7 +36,6 @@ public class elevatorUDPThread implements Runnable {
 				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Create the packet to receive into
 				recSocket.receive(recievedPacket); //Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
-
 				if(message[0].equals("poll")) {	//If the command is a poll command
 					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
 					System.out.println("Poll: Sending: " +pollResponse);
@@ -65,11 +65,10 @@ public class elevatorUDPThread implements Runnable {
 		try {
 			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message
 			recSocket.receive(recievedPacket);	//recieves response
+
 			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If the response is not an ack
 				throw new IOException("No Ack recieved on completeMove "  + currentFloor);	//Throw IOException
-			}
-			
-			
+			}			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

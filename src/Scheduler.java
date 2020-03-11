@@ -180,19 +180,32 @@ public class Scheduler {
 				// if there are still requests in the elevator queue, send the next one
 				if (elevators.get(elevatorID).size() != 0) {
 					int nextFloor = elevators.get(elevatorID).get(0);
-					System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
-					udp.moveElevator(elevatorID, nextFloor);
+					System.out.println("New elevator move id=" + elevatorID+ "to floor "+nextFloor);
+					sendMove(elevatorID, nextFloor);
+					break;
 				}
 			} else {
 				int nextFloor = elevators.get(elevatorID).get(0);
-				System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
-				udp.moveElevator(elevatorID, nextFloor);
+				System.out.println("New elevator move id=" + elevatorID+ " to floor "+nextFloor);
+				sendMove(elevatorID, nextFloor);
+				break;
 			}
 		}
 		
 		System.out.println("Scheduler state: " + currentState.toString());
+		return;
 	}
-
+	
+	//sending next move asynchronously so that the original function can return
+	private void sendMove(int elevatorID, int nextFloor) {
+		new Thread() {
+		   @Override
+		   public void run() {
+				udp.moveElevator(elevatorID, nextFloor);
+		   }
+		}.start();
+	} 
+	
 	// Enums used to represent the 4 states of the scheduler state machine.
 	public enum schedulerStateMachine {
 		noRequests {

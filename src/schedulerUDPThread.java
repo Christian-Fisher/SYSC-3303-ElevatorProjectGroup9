@@ -42,7 +42,7 @@ public class schedulerUDPThread implements Runnable {
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				switch (message[0]) {	//The first index will hold the type of message
 				case "moveComplete": {	//If the message was a moveComplete message from an elevator
-					System.out.println("moveCompelte Recieved");
+					System.out.println("moveComplete Recieved");
 					scheduler.completeRequest(Integer.parseInt(message[1]), Integer.parseInt(message[2]));	//Notify the scheduler that the elevator reached it's destination
 					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
 					break;
@@ -101,7 +101,8 @@ public class schedulerUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(toFloorPacket);	//Sends the packet
-			recSocket.receive(recievedPacket);	//Recieves the response
+			recSocket.receive(recievedPacket);	//sRecieves the response
+
 			if (!new String(recievedPacket.getData()).trim().equals("ack")) {	//If the response was not an acknowledgement
 				throw new IOException("not ack recieved");	//Throw not ack recieved exception
 			}

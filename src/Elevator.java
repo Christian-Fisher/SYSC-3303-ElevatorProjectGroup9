@@ -11,6 +11,8 @@ public class Elevator implements Runnable {
 	private int currentFloor, requestedFloor;
 	private Direction dir;
 	private int elID;
+	// intialize elevator state to current floor with doors closed
+	private ElevatorStateMachine currState;
 
 	/**
 	 * Constructor for the Elevator class
@@ -22,6 +24,7 @@ public class Elevator implements Runnable {
 		requestedFloor = 0;
 		currentFloor = 0;
 		dir = Direction.IDLE;
+		currState = ElevatorStateMachine.CurrFloorDoorsClosed;
 		udp = new elevatorUDPThread(elID, this);
 		Thread udpThread = new Thread(udp);
 		udpThread.setName("Elevator: " + elID);
@@ -46,7 +49,6 @@ public class Elevator implements Runnable {
 			this.currentFloor++;
 		} else if (this.getDirection() == Direction.DOWN) {
 			this.currentFloor--;
-		} else {
 		}
 	}
 
@@ -56,7 +58,6 @@ public class Elevator implements Runnable {
 
 	public synchronized void setRequestedFloor(int requestedFloor) {
 		this.requestedFloor = requestedFloor;
-		System.out.println("set req to " + requestedFloor);
 	}
 
 	/**
@@ -118,7 +119,6 @@ public class Elevator implements Runnable {
 
 		public abstract ElevatorStateMachine nextState();
 	}
-
 	/**
 	 * Runs continuously once the thread is started until the program is terminated
 	 * Calls the scheduler to see if there is work to be done, moves accordingly,
@@ -126,18 +126,11 @@ public class Elevator implements Runnable {
 	 */
 	@Override
 	public void run() {
-
-		// intialize elevator state to current floor with doors closed
-		ElevatorStateMachine currState = ElevatorStateMachine.CurrFloorDoorsClosed;
-
 		while (true) {
-
 			// Switch statement for elevator state
 			switch (currState) {
-
-			case CurrFloorDoorsClosed: {
-				// Elevator calling the scheduler
-					System.out.println("req: " + this.getRequestedFloor());
+				case CurrFloorDoorsClosed: {
+					// Elevator calling the scheduler
 					if (this.getCurrentFloor() != this.getRequestedFloor()) {
 						currState = currState.nextState();
 						break;
@@ -145,60 +138,55 @@ public class Elevator implements Runnable {
 					try {
 						Thread.sleep(250);
 					}catch(InterruptedException e) {
-						
+						System.out.println(e.toString());
 					}
-					
-				
-				break;
-			}
-
-			case Moving: {
-				// Elevator moves to the floor of the request
-
-				int diff = this.getCurrentFloor() - this.getRequestedFloor();
-				if (diff > 0) {
-					this.setDirection(Direction.DOWN);
-					try {
-						this.move();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				} else if (diff < 0) {
-					this.setDirection(Direction.UP);
-					try {
-						this.move();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				} else {
-					this.setDirection(Direction.IDLE);
-					currState = currState.nextState();
 					break;
 				}
-
-				break;
-			}
-
-			case ArriveReqFloor: {
-				currState = currState.nextState();
-				break;
-
-			}
-
-			case ReqFloorDoorsOpened: {
-				currState = currState.nextState();
-				udp.completeMove(elID, currentFloor);
-				break;
-
-			}
-
+	
+				case Moving: {
+					// Elevator moves to the floor of the request
+	
+					int diff = this.getCurrentFloor() - this.getRequestedFloor();
+					if (diff > 0) {
+						this.setDirection(Direction.DOWN);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} else if (diff < 0) {
+						this.setDirection(Direction.UP);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} else {
+						this.setDirection(Direction.IDLE);
+						currState = currState.nextState();
+						break;
+					}
+	
+					break;
+				}
+	
+				case ArriveReqFloor: {
+					currState = currState.nextState();
+					break;
+	
+				}
+	
+				case ReqFloorDoorsOpened: {
+					currState = currState.nextState();
+					completeMove(elID, currentFloor);
+					break;
+	
+				}
 			}
 			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
 				System.out.println("Current state: " + currState);
 			}
-
 		}
-
 	}
 
 	/**
@@ -218,4 +206,14 @@ public class Elevator implements Runnable {
 		Thread.sleep(2000);
 
 	}
+	
+	//completing move asynchronously so that it can return back to state machine
+	private void completeMove(int elID, int currentFloor) {
+		new Thread() {
+		   @Override
+		   public void run() {
+				udp.completeMove(elID, currentFloor);
+		   }
+		}.start();
+	} 
 }
