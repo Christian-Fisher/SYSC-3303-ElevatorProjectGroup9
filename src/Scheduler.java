@@ -17,13 +17,35 @@ class ElevatorDetail implements Comparable<ElevatorDetail> {
 	}
 
 	public int compareTo(ElevatorDetail otherE) {
-		if (this.desiredDirection != otherE.direction && this.desiredDirection == otherE.direction) {
+        if(this.distance == 0 && otherE.distance > 0) {
+			return 1; 
+		}
+		if(otherE.distance == 0 && this.distance > 0) {
+			return -1; 
+		}
+		if(this.desiredDirection != this.direction && this.direction != Direction.IDLE && otherE.direction == Direction.IDLE) {
+			return 1;
+		}
+		if(this.desiredDirection != otherE.direction && otherE.direction != Direction.IDLE && this.direction == Direction.IDLE) {
 			return -1;
 		}
-		if (distance < otherE.distance) {
-			return 1;
-		} else if (distance > otherE.distance) {
+		if((this.desiredDirection == this.direction && this.desiredDirection == otherE.direction) ||
+				(this.desiredDirection != this.direction && this.desiredDirection != otherE.direction)) {
+			if(this.distance == otherE.distance) {
+				return 0;
+			}
+			return this.distance < otherE.distance ? -1 : 1;
+		}
+		if (this.desiredDirection != otherE.direction && this.desiredDirection == this.direction && otherE.direction != Direction.IDLE) {
 			return -1;
+		}
+		if (this.desiredDirection != this.direction && this.desiredDirection == otherE.direction && this.direction != Direction.IDLE) {
+			return 1;
+		}
+		if (this.distance < otherE.distance) {
+			return -1;
+		} else if (this.distance > otherE.distance) {
+			return 1;
 		} else {
 			return 0;
 		}
@@ -79,16 +101,20 @@ public class Scheduler {
 		// and floor
 		List<ElevatorDetail> consideredElevators = new ArrayList<ElevatorDetail>();
 		RequestData[] polledElevators = udp.pollElevators(); // get the in processing request data for every elevator
-
+		//System.out.println("Polled elevator currentFloor: "+polledElevators[1].getCurrentFloor()+ " ID: "+polledElevators[1].getElevatorID());
+		
 		for (int i = 0; i < polledElevators.length; i++) {
 			int distanceFromCurrentFloor = Math.abs(c - polledElevators[i].getCurrentFloor());
 
 			ElevatorDetail ed = new ElevatorDetail(polledElevators[i].getElevatorID(),
 					polledElevators[i].getDirection(), r.getDirection(), distanceFromCurrentFloor);
+			System.out.println("Distance to elevator "+polledElevators[i].getElevatorID()+": "+distanceFromCurrentFloor 
+					+ ", Direction: "+polledElevators[i].getDirection());
 			consideredElevators.add(ed);
 		}
 		Collections.sort(consideredElevators); // sort the elevators
 		int optimalElevatorID = consideredElevators.get(0).id;
+		System.out.println("Optimal Elevator: "+optimalElevatorID);
 
 		r.setElevatorID(optimalElevatorID); // set the elevator id to optimally selected elevator
 		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); // get the elevator's queue
@@ -96,6 +122,8 @@ public class Scheduler {
 		optimalElevator.add(c); // add floors
 		optimalElevator.add(d);
 		Collections.sort(optimalElevator); // sort the floors
+		System.out.println("Add "+c+" & "+d+" to elevator "+optimalElevatorID+" Elevator queue: "+ optimalElevator);
+
 		elevators.set(optimalElevatorID, optimalElevator);
 
 		udp.moveElevator(optimalElevatorID, optimalElevator.get(0)); // tell chosen elevator to go to first request
@@ -173,26 +201,41 @@ public class Scheduler {
 		elevators.get(elevatorID).remove(indexOfCurrentFloor);
 		for (RequestData r : requests) {
 			// destination floor
-			if (r.getRequestedFloor() == currentFloor) {
-				udp.toFloor(r);
-				requests.remove(r);
-				currentState = currentState.nextState();
-				// if there are still requests in the elevator queue, send the next one
-				if (elevators.get(elevatorID).size() != 0) {
-					int nextFloor = elevators.get(elevatorID).get(0);
-					System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
-					udp.moveElevator(elevatorID, nextFloor);
-				}
-			} else {
-				int nextFloor = elevators.get(elevatorID).get(0);
-				System.out.println("New elevator move:" + elevatorID+ "to floor "+nextFloor);
-				udp.moveElevator(elevatorID, nextFloor);
+			if (r.getElevatorID() == elevatorID ) {
+					if(r.getRequestedFloor() == currentFloor) {
+						udp.toFloor(r);
+						requests.remove(r);
+						currentState = currentState.nextState();
+						// if there are still requests in the elevator queue, send the next one
+						if (elevators.get(elevatorID).size() != 0) {
+							int nextFloor = elevators.get(elevatorID).get(0);
+							System.out.println("New elevator move id=" + elevatorID+ "to floor "+nextFloor);
+							sendMove(elevatorID, nextFloor);
+							break;
+						}
+					} else {
+						int nextFloor = elevators.get(elevatorID).get(0);
+						System.out.println("New elevator move id=" + elevatorID+ " to floor "+nextFloor);
+						sendMove(elevatorID, nextFloor);
+						break;
+					}
 			}
 		}
 		
 		System.out.println("Scheduler state: " + currentState.toString());
+		return;
 	}
-
+	
+	//sending next move asynchronously so that the original function can return
+	private void sendMove(int elevatorID, int nextFloor) {
+		new Thread() {
+		   @Override
+		   public void run() {
+				udp.moveElevator(elevatorID, nextFloor);
+		   }
+		}.start();
+	} 
+	
 	// Enums used to represent the 4 states of the scheduler state machine.
 	public enum schedulerStateMachine {
 		noRequests {

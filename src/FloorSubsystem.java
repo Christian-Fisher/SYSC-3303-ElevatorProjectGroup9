@@ -50,6 +50,7 @@ public class FloorSubsystem implements Runnable {
 					Thread.currentThread().interrupt();
 				}
 				udpFloorSubsystemThread.sendRequest(dataArray.pop());
+				//System.out.println("Next request: "+dataArray.peek());
 			}
 
 			}

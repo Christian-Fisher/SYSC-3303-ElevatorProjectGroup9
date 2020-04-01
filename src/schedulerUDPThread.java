@@ -42,9 +42,9 @@ public class schedulerUDPThread implements Runnable {
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				switch (message[0]) {	//The first index will hold the type of message
 				case "moveComplete": {	//If the message was a moveComplete message from an elevator
-					System.out.println("moveCompelte Recieved");
+					System.out.println("moveComplete Recieved");
 					scheduler.completeRequest(Integer.parseInt(message[1]), Integer.parseInt(message[2]));	//Notify the scheduler that the elevator reached it's destination
-					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
+					//socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
 					break;
 				}
 				case "newRequest": {		//The message was a new request from the floor subsystem
@@ -54,7 +54,7 @@ public class schedulerUDPThread implements Runnable {
 					request.setMove(Direction.valueOf(message[2]));	//Sets the direction to the direction specified in the message
 					request.setRequestFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
 					scheduler.placeRequest(request);	//The request is sent to the scheduler
-					socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
+					//socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
 					break;
 				}
 				}
@@ -79,12 +79,14 @@ public class schedulerUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Creates a packet to recieve the response
 		try {
 			socket.send(elevatorMovePacket);	//Sends the command
-			recSocket.receive(recievedPacket);		//Recieves the response of the elevator
+			//socket.receive(recievedPacket);
+			//String r = new String(recievedPacket.getData()).trim();
+			/*recSocket.receive(recievedPacket);		//Receives the response of the elevator
 			if (new String(recievedPacket.getData()).trim().equals("ack")) {	//If the response was not an acknowledgement, throw exception
 				return;
 			} else {
 				throw new IOException("not ack recieved");
-			}
+			}*/
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -101,10 +103,11 @@ public class schedulerUDPThread implements Runnable {
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(toFloorPacket);	//Sends the packet
-			recSocket.receive(recievedPacket);	//Recieves the response
+			/*recSocket.receive(recievedPacket);	//sRecieves the response
+
 			if (!new String(recievedPacket.getData()).trim().equals("ack")) {	//If the response was not an acknowledgement
 				throw new IOException("not ack recieved");	//Throw not ack recieved exception
-			}
+			}*/
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -116,15 +119,16 @@ public class schedulerUDPThread implements Runnable {
  * 
  * @return	Array of RequetData that contains the direction and currentFloor of all elevators
  */
-	public RequestData[] pollElevators() {
+	public synchronized RequestData[] pollElevators() {
+		RequestData[] elevatorInfo = new RequestData[elePortArray.length];	//Creates an array of RequestData with the length = numOfElevators
 		try {
 		byte[] dataToSend = new String("poll").getBytes(); //Creates the poll message
-		RequestData[] elevatorInfo = new RequestData[elePortArray.length];	//Creates an array of RequestData with the length = numOfElevators
+		
 		for (int elevatorID = 0; elevatorID < elePortArray.length; elevatorID++) {	//For each elevator
 			DatagramPacket elevatorPollPacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
 					elePortArray[elevatorID]);		//Create a new packet to send to the elevator
 			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Packet to recieve into
-			elevatorInfo[elevatorID] = new RequestData();	//initialize the RequestData at the current index
+			//elevatorInfo[elevatorID] = new RequestData();	//initialize the RequestData at the current index
 		
 				
 				socket.send(elevatorPollPacket);	//Sends the poll command
@@ -132,19 +136,22 @@ public class schedulerUDPThread implements Runnable {
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
 				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1]  );
 				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
-					elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
-					elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor
+					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1);
+					elevatorInfo[elevatorID].setElevatorID(elevatorID);
+					//elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
+					//elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor
 				} else {
 					throw new IOException("response is not the correct length (2)");	//Recieved the wrong packet
 				}
 			
 		}
-		return elevatorInfo;
+		
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return null;
+		return elevatorInfo;
+		//return null;
 	}
 
 }
