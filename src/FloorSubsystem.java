@@ -89,10 +89,5 @@ public class FloorSubsystem implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void main(String[] args) {
-		FloorSubsystem f = new FloorSubsystem();
-		
-	}
 
 }
