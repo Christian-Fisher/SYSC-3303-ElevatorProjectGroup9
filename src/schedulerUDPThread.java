@@ -48,11 +48,12 @@ public class schedulerUDPThread implements Runnable {
 					break;
 				}
 				case "newRequest": {		//The message was a new request from the floor subsystem
-					System.out.println("newRequest Recieved");
+					System.out.println("newRequest Received");
 					RequestData request = new RequestData();	//Creates a new RequestData to store the new request into
 					request.setCurrentFloor(Integer.parseInt(message[1]));	//Sets the currentFloor of request to the floor stored in the message
 					request.setMove(Direction.valueOf(message[2]));	//Sets the direction to the direction specified in the message
 					request.setRequestFloor(Integer.parseInt(message[3]));	//The requested floor is then added to the request
+					request.setErrorMessage(message[4]);
 					scheduler.placeRequest(request);	//The request is sent to the scheduler
 					//socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
 					break;

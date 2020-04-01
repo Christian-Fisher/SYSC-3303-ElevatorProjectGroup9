@@ -11,6 +11,9 @@ import java.util.StringTokenizer;
  * 
  * @author Nicholas Porter
  * @version 1.0
+ * 
+ * @author Sonia Hassan-Legault
+ * @version 2.0 Error message now added
  *
  *	RequestData models the time, floor number
  *	and elevator 
@@ -22,13 +25,15 @@ public class RequestData implements Serializable {
 	private int delay;
 	private int requestFloor;
 	private int elevatorID;
+	private String errorMessage;
 	
-	public RequestData(int delay, int currentFloor, Direction direction, int requestFloor) {
+	public RequestData(int delay, int currentFloor, Direction direction, int requestFloor, String errorMessage) {
 		this.delay = delay;
 		this.currentFloor = currentFloor;
 		this.move = direction;
 		this.requestFloor = requestFloor;
 		this.elevatorID = -1;
+		this.errorMessage = errorMessage;
 
 	}
 	
@@ -37,8 +42,17 @@ public class RequestData implements Serializable {
 		this.currentFloor = -1;
 		this.move =Direction.IDLE;
 		this.requestFloor = -1;
+		this.errorMessage = null;
 	}
 	
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	public int getElevatorID() {
 		return elevatorID;
 	}

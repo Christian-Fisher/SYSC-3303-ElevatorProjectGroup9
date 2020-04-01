@@ -50,14 +50,14 @@ public class floorSubsystemThread implements Runnable {
 		}
 	}
 
-/**Sends a request to the scheulder
+/**Sends a request to the scheduler
  * 
  * @param request The request to send to scheduler
  */
 	public void sendRequest(RequestData request) {
 		try {
 			byte[] dataToSend = ("newRequest" + COMMA + request.getCurrentFloor() + COMMA + request.getDirection().toString() + COMMA
-					+ request.getRequestedFloor()).getBytes();	//Creates the message out of the input RequestData
+					+ request.getRequestedFloor() + COMMA + request.getErrorMessage()).getBytes();	//Creates the message out of the input RequestData
 			DatagramPacket requestPacket = new DatagramPacket(dataToSend, dataToSend.length, schedulerAddress,
 					schedulerPort);	//Creates packet to send to scheduler
 			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
