@@ -17,7 +17,29 @@ class ElevatorDetail implements Comparable<ElevatorDetail> {
 	}
 
 	public int compareTo(ElevatorDetail otherE) {
-		if (this.desiredDirection != otherE.direction && this.desiredDirection == otherE.direction) {
+        if(this.distance == 0 && otherE.distance > 0) {
+			return 1; 
+		}
+		if(otherE.distance == 0 && this.distance > 0) {
+			return -1; 
+		}
+		if(this.desiredDirection != this.direction && this.direction != Direction.IDLE && otherE.direction == Direction.IDLE) {
+			return 1;
+		}
+		if(this.desiredDirection != otherE.direction && otherE.direction != Direction.IDLE && this.direction == Direction.IDLE) {
+			return -1;
+		}
+		if((this.desiredDirection == this.direction && this.desiredDirection == otherE.direction) ||
+				(this.desiredDirection != this.direction && this.desiredDirection != otherE.direction)) {
+			if(this.distance == otherE.distance) {
+				return 0;
+			}
+			return this.distance < otherE.distance ? -1 : 1;
+		}
+		if (this.desiredDirection != otherE.direction && this.desiredDirection == this.direction && otherE.direction != Direction.IDLE) {
+			return -1;
+		}
+		if (this.desiredDirection != this.direction && this.desiredDirection == otherE.direction && this.direction != Direction.IDLE) {
 			return 1;
 		}
 		if (this.distance < otherE.distance) {
@@ -86,7 +108,8 @@ public class Scheduler {
 
 			ElevatorDetail ed = new ElevatorDetail(polledElevators[i].getElevatorID(),
 					polledElevators[i].getDirection(), r.getDirection(), distanceFromCurrentFloor);
-			System.out.println("Distance to elevator "+polledElevators[i].getElevatorID()+": "+distanceFromCurrentFloor);
+			System.out.println("Distance to elevator "+polledElevators[i].getElevatorID()+": "+distanceFromCurrentFloor 
+					+ ", Direction: "+polledElevators[i].getDirection());
 			consideredElevators.add(ed);
 		}
 		Collections.sort(consideredElevators); // sort the elevators
@@ -97,10 +120,10 @@ public class Scheduler {
 		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); // get the elevator's queue
 
 		optimalElevator.add(c); // add floors
-		System.out.println("Add "+c+" to elevator "+optimalElevatorID+" Elevator queue: "+ optimalElevator);
 		optimalElevator.add(d);
-		System.out.println("Add "+d+" to elevator "+optimalElevatorID+" Elevator queue: "+ optimalElevator);
 		Collections.sort(optimalElevator); // sort the floors
+		System.out.println("Add "+c+" & "+d+" to elevator "+optimalElevatorID+" Elevator queue: "+ optimalElevator);
+
 		elevators.set(optimalElevatorID, optimalElevator);
 
 		udp.moveElevator(optimalElevatorID, optimalElevator.get(0)); // tell chosen elevator to go to first request
