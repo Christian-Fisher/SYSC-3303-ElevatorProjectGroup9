@@ -14,6 +14,9 @@ import java.util.Scanner;
  * @author Christian Fisher
  * @version 1.0 The Floor Subsystem is responsible for reading the requests from
  *          a textfile and sending these requests to the scheduler.
+ *          
+ * @author Sonia Hassan-Legault
+ * @version 2.0 error introduced in the inputFile and now added to RequestData
  * 
  * 
  */
@@ -74,8 +77,9 @@ public class FloorSubsystem implements Runnable {
 					move = Direction.UP;
 				}
 				int delay = Integer.parseInt(splitLine[0]);
+				String error = splitLine[4];
 
-				dataArray.add(new RequestData(delay, Integer.parseInt(splitLine[2]), move, Integer.parseInt(splitLine[3]))); // Creates the RequestData object with the input from the text file
+				dataArray.add(new RequestData(delay, Integer.parseInt(splitLine[2]), move, Integer.parseInt(splitLine[3]),error)); // Creates the RequestData object with the input from the text file
 
 			}
 			fileReader.close();// Closes the file

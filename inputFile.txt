@@ -1,5 +1,5 @@
-5 Up 1 7
-3 Up 2 4
-4 Down 6 3
-2 Up 1 4
-4 Down 4 1
+5 Up 1 7 null
+3 Up 2 4 transient
+4 Down 6 3 hard
+2 Up 1 4 null
+4 Down 4 1 null
