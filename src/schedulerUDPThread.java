@@ -74,7 +74,7 @@ public class schedulerUDPThread implements Runnable {
  * @param moveToFloor	Floor to move the elevator to
  */
 	public void moveElevator(int elevatorID, int moveToFloor, String errorMessage) {
-		byte[] dataToSend = new String("move" + COMMA + moveToFloor).getBytes();	//Creates a message of the format "move,floorNumber"
+		byte[] dataToSend = new String("move" + COMMA + moveToFloor + COMMA + "error" + COMMA + errorMessage).getBytes();	//Creates a message of the format "move,floorNumber"
 		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
 				elePortArray[elevatorID]);		//Creates the packet to send to the elevator
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Creates a packet to recieve the response
