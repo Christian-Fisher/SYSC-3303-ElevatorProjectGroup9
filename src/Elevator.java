@@ -219,5 +219,10 @@ public class Elevator implements Runnable {
 				udp.completeMove(elID, currentFloor);
 		   }
 		}.start();
+	}
+
+	public void setError(String errorMessage) {
+		System.out.println("Elevator "+ this.getElID() + " Error Status: " + errorMessage);
+		
 	} 
 }

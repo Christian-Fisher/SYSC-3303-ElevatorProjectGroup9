@@ -73,8 +73,8 @@ public class schedulerUDPThread implements Runnable {
  * @param elevatorID	ID of the elevator to move
  * @param moveToFloor	Floor to move the elevator to
  */
-	public void moveElevator(int elevatorID, int moveToFloor) {
-		byte[] dataToSend = new String("move" + COMMA + moveToFloor).getBytes();	//Creates a message of the format "move,floorNumber"
+	public void moveElevator(int elevatorID, int moveToFloor, String errorMessage) {
+		byte[] dataToSend = new String("move" + COMMA + moveToFloor + COMMA + "error" + COMMA + errorMessage).getBytes();	//Creates a message of the format "move,floorNumber"
 		DatagramPacket elevatorMovePacket = new DatagramPacket(dataToSend, dataToSend.length, elevatorAddress,
 				elePortArray[elevatorID]);		//Creates the packet to send to the elevator
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//Creates a packet to recieve the response
@@ -137,7 +137,8 @@ public class schedulerUDPThread implements Runnable {
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
 				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1]  );
 				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
-					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1);
+					// TODO add the proper error message in request data once elevator is modified
+					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1, null); //temporary fix
 					elevatorInfo[elevatorID].setElevatorID(elevatorID);
 					//elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
 					//elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor

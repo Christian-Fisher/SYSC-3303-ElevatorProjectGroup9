@@ -43,6 +43,7 @@ public class elevatorUDPThread implements Runnable {
 				}else if(message[0].equals("move")) {
 					//socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));
 					elevator.setRequestedFloor(Integer.parseInt(message[1]));
+					elevator.setError(message[3]);
 					System.out.println("set req floor to "+ Integer.parseInt(message[1]));
 					
 		
