@@ -37,7 +37,7 @@ public class elevatorUDPThread implements Runnable {
 				recSocket.receive(recievedPacket); //Receive the incoming packet
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				if(message[0].equals("poll")) {	//If the command is a poll command
-					String pollResponse = "" + elevator.getDirection() +","+ elevator.getCurrentFloor();	//Create the response
+					String pollResponse = "" + elevator.getDirection() +COMMA+ elevator.getCurrentFloor()+COMMA+elevator.getError();	//Create the response
 					System.out.println("Poll: "+elevator.getElID()+" Sending: " +pollResponse);
 					socket.send(new DatagramPacket(pollResponse.getBytes(), pollResponse.getBytes().length, schedulerAddress, schedulerPort));	//send response
 				}else if(message[0].equals("move")) {
