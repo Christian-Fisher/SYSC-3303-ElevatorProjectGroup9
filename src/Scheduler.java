@@ -88,7 +88,6 @@ public class Scheduler {
 	public synchronized void placeRequest(RequestData r) {
 		System.out.println("Scheduler state: " + currentState.toString());
 
-		requests.add(r);
 		System.out.println(r.getDelay() + " -  Request made at floor #" + r.getCurrentFloor() + " to go "
 				+ r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
 
@@ -101,9 +100,11 @@ public class Scheduler {
 		// and floor
 		List<ElevatorDetail> consideredElevators = new ArrayList<ElevatorDetail>();
 		RequestData[] polledElevators = udp.pollElevators(); // get the in processing request data for every elevator
-		//System.out.println("Polled elevator currentFloor: "+polledElevators[1].getCurrentFloor()+ " ID: "+polledElevators[1].getElevatorID());
 		
 		for (int i = 0; i < polledElevators.length; i++) {
+			if(polledElevators[i].getErrorMessage().compareTo("null") != 0) { // not considering elevators that have an error
+				continue;
+			}
 			int distanceFromCurrentFloor = Math.abs(c - polledElevators[i].getCurrentFloor());
 
 			ElevatorDetail ed = new ElevatorDetail(polledElevators[i].getElevatorID(),
@@ -126,9 +127,10 @@ public class Scheduler {
 
 		elevators.set(optimalElevatorID, optimalElevator);
 
-		udp.moveElevator(optimalElevatorID, optimalElevator.get(0)); // tell chosen elevator to go to first request
+		udp.moveElevator(optimalElevatorID, optimalElevator.get(0), r.getErrorMessage()); // tell chosen elevator to go to first request
 																		// floor
-
+		r.setErrorMessage(null);
+		requests.add(r);
 		// The floor subsystem calls the placeRequest function and gives the Scheduler
 		// all the requests.
 		if (currentState.equals(Scheduler.schedulerStateMachine.noRequests)) {
@@ -231,7 +233,7 @@ public class Scheduler {
 		new Thread() {
 		   @Override
 		   public void run() {
-				udp.moveElevator(elevatorID, nextFloor);
+				udp.moveElevator(elevatorID, nextFloor, null);
 		   }
 		}.start();
 	} 
