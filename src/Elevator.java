@@ -11,6 +11,20 @@ public class Elevator implements Runnable {
 	private int currentFloor, requestedFloor;
 	private Direction dir;
 	private int elID;
+	private String Error;
+	private boolean doorsOpen = false;
+
+	public boolean isDoorsOpen() {
+		return doorsOpen;
+	}
+
+	public void setDoorsOpen(boolean doorsOpen) {
+		this.doorsOpen = doorsOpen;
+	}
+	public String getError() {
+		return Error;
+	}
+
 	public int getElID() {
 		return elID;
 	}
@@ -49,11 +63,14 @@ public class Elevator implements Runnable {
 	 * travelling
 	 */
 	public void updateCurrentFloor() {
-		if (this.getDirection() == Direction.UP) {
-			this.currentFloor++;
-		} else if (this.getDirection() == Direction.DOWN) {
-			this.currentFloor--;
+		if (!Error.equals("hard")) {
+			if (this.getDirection() == Direction.UP) {
+				this.currentFloor++;
+			} else if (this.getDirection() == Direction.DOWN) {
+				this.currentFloor--;
+			}
 		}
+		
 	}
 
 	public synchronized int getRequestedFloor() {
@@ -123,6 +140,7 @@ public class Elevator implements Runnable {
 
 		public abstract ElevatorStateMachine nextState();
 	}
+
 	/**
 	 * Runs continuously once the thread is started until the program is terminated
 	 * Calls the scheduler to see if there is work to be done, moves accordingly,
@@ -141,15 +159,15 @@ public class Elevator implements Runnable {
 					}
 					try {
 						Thread.sleep(250);
-					}catch(InterruptedException e) {
+					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
 					break;
 				}
-	
+
 				case Moving: {
 					// Elevator moves to the floor of the request
-	
+
 					int diff = this.getCurrentFloor() - this.getRequestedFloor();
 					if (diff > 0) {
 						this.setDirection(Direction.DOWN);
@@ -170,25 +188,49 @@ public class Elevator implements Runnable {
 						currState = currState.nextState();
 						break;
 					}
-	
+
 					break;
 				}
-	
+
 				case ArriveReqFloor: {
+					try {
+						this.setDoors(true);
+						Thread.sleep(1100);
+						if (!this.isDoorsOpen()) {
+//							currState=TRANSIENTSTATE;
+							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
+							break;
+						}
+					} catch (InterruptedException e) {
+						System.out.println("Door open Timer interrupted. Who did that?");
+					}
+
 					currState = currState.nextState();
 					break;
-	
+
 				}
-	
+
 				case ReqFloorDoorsOpened: {
+					try {
+						this.setDoors(false);
+						Thread.sleep(1100);
+						if (this.isDoorsOpen()) {
+//							currState=TRANSIENTSTATE;
+							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
+							break;
+						}
+					} catch (InterruptedException e) {
+						System.out.println("Door close Timer interrupted. Who did that?");
+
+					}
 					currState = currState.nextState();
 					completeMove(elID, currentFloor);
 					break;
-	
+
 				}
 			}
 			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
-				System.out.println("Elevator "+elID+": Current state: " + currState);
+				System.out.println("Elevator " + elID + ": Current state: " + currState);
 			}
 		}
 	}
@@ -204,25 +246,37 @@ public class Elevator implements Runnable {
 	 * @throws InterruptedException
 	 */
 	private void move() throws InterruptedException {
-
+		int startFloor = this.getCurrentFloor(); // Saves the position of the elevator before attempting a move.
 		this.updateCurrentFloor();
-		System.out.println("Elevator "+elID+": At floor: " + getCurrentFloor());
-		Thread.sleep(2000);
+		Thread.sleep(3000);
+		if (this.getCurrentFloor() == startFloor) { // If the elevator has not moved after 3 seconds, it is stuck and
+													// therefore is hard faulting
+			System.out.println("Elevator " + this.getElID()+ "in hard fault state");
+//			currState = HARDFAULTSTATE;
+		}
 
 	}
-	
-	//completing move asynchronously so that it can return back to state machine
+
+	// completing move asynchronously so that it can return back to state machine
 	private void completeMove(int elID, int currentFloor) {
 		new Thread() {
-		   @Override
-		   public void run() {
+			@Override
+			public void run() {
 				udp.completeMove(elID, currentFloor);
-		   }
+			}
 		}.start();
 	}
 
+	private void setDoors(boolean open) {
+		if (!Error.equals("transient")||(!Error.equals("transientClose"))) {
+			this.setDoorsOpen(open);
+		}
+
+	}
+
 	public void setError(String errorMessage) {
-		System.out.println("Elevator "+ this.getElID() + " Error Status: " + errorMessage);
-		
-	} 
+		this.Error = errorMessage;
+		System.out.println("Elevator " + this.getElID() + " Error Status: " + errorMessage);
+
+	}
 }
