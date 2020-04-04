@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -206,12 +207,14 @@ public class Scheduler {
 		// remove currentFloor from elevatorID's queue
 		int indexOfCurrentFloor = elevators.get(elevatorID).indexOf(currentFloor);
 		elevators.get(elevatorID).remove(indexOfCurrentFloor);
-		for (RequestData r : requests) {
+		Iterator<RequestData> rIterator = requests.iterator();
+		while(rIterator.hasNext()) {
+			RequestData r = rIterator.next();
 			// destination floor
 			if (r.getElevatorID() == elevatorID ) {
 					if(r.getRequestedFloor() == currentFloor) {
 						udp.toFloor(r);
-						requests.remove(r);
+						rIterator.remove();
 						currentState = currentState.nextState();
 						// if there are still requests in the elevator queue, send the next one
 						if (elevators.get(elevatorID).size() != 0) {
@@ -269,10 +272,12 @@ public class Scheduler {
 			// the state to uncompletedRequests.
 
 			public schedulerStateMachine nextState() {
-				if (requests.size() > 0) {
-					return uncompletedRequests;
+				synchronized(requests) {
+					if (requests.size() > 0) {
+						return uncompletedRequests;
+					}
+					return noRequests;
 				}
-				return noRequests;
 			}
 
 		};
