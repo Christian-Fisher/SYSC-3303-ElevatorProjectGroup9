@@ -122,7 +122,12 @@ public class Scheduler {
 
 		optimalElevator.add(c); // add floors
 		optimalElevator.add(d);
-		Collections.sort(optimalElevator); // sort the floors
+		
+		if(consideredElevators.get(0).direction == Direction.DOWN || d - c < 0) {
+			Collections.sort(optimalElevator, Collections.reverseOrder()); //sort the floors decreasing
+		} else {
+			Collections.sort(optimalElevator); // sort the floors increasing 
+		}
 		System.out.println("Add "+c+" & "+d+" to elevator "+optimalElevatorID+" Elevator queue: "+ optimalElevator);
 
 		elevators.set(optimalElevatorID, optimalElevator);
