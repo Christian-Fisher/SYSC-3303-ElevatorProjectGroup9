@@ -107,7 +107,12 @@ public class Elevator implements Runnable {
 		CurrFloorDoorsClosed {
 			@Override
 			public ElevatorStateMachine nextState() {
-				return Moving;
+				if(Error != "hard") {
+					return Moving;
+				}
+				else {
+					return null;
+				}
 			}
 			
 		},
@@ -115,7 +120,7 @@ public class Elevator implements Runnable {
 		Moving {
 			@Override
 			public ElevatorStateMachine nextState() {
-				if(Error == null) {
+				if(Error != "hard" || Error != "transient") {
 					return ArriveReqFloor;
 				}
 				else {
@@ -140,13 +145,13 @@ public class Elevator implements Runnable {
 		transientError{
 			@Override
 			public ElevatorStateMachine nextState() {
-				return Moving;
+				return ReqFloorDoorsOpened;
 			}
 		},
 		
 		hardState{
 			public ElevatorStateMachine nextState() {
-				return null;
+				return CurrFloorDoorsClosed;
 			}
 		},
 		
@@ -195,7 +200,7 @@ public class Elevator implements Runnable {
 
 				case Moving: {
 					// Elevator moves to the floor of the request
-					if (Error == null) {
+					if (Error != "hard" || Error != "transient") {
 						int diff = this.getCurrentFloor() - this.getRequestedFloor();
 						if (diff > 0) {
 							this.setDirection(Direction.DOWN);
@@ -219,6 +224,7 @@ public class Elevator implements Runnable {
 					}
 					else {
 						//We have an error in this request (either transient or Hard Fault)
+						System.out.println("We have an error");
 						currState = currState.nextState();
 					}
 					break;
@@ -230,26 +236,29 @@ public class Elevator implements Runnable {
 					
 				case hardState:{
 					System.out.println("The elevator with id:" + this.elID + "has experienced a hard fault error.");
+					currState = currState.nextState();
 					break;
 				}
 				
 				case transientError:{
 					try {
-						Thread.sleep(250);
+						Thread.sleep(100);
 					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
-					this.setError(null);
-					Error = null;
+					this.setError("null");
+					Error = "null";
 					currState = currState.nextState();
 					break;
 				}
+				
 				
 				case ArriveReqFloor: {
 					try {
 						this.setDoors(true);
 						Thread.sleep(1100);
 						if (!this.isDoorsOpen()) {
+							currState = ElevatorStateMachine.transientError;
 							//currState=TRANSIENTSTATE;
 							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
 							break;
@@ -268,6 +277,7 @@ public class Elevator implements Runnable {
 						this.setDoors(false);
 						Thread.sleep(1100);
 						if (this.isDoorsOpen()) {
+							currState = ElevatorStateMachine.transientError;
 //							currState=TRANSIENTSTATE;
 							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
 							break;
@@ -306,6 +316,7 @@ public class Elevator implements Runnable {
 		if (this.getCurrentFloor() == startFloor) { // If the elevator has not moved after 3 seconds, it is stuck and
 													// therefore is hard faulting
 			System.out.println("Elevator " + this.getElID()+ "in hard fault state");
+			currState = ElevatorStateMachine.hardState;
 //			currState = HARDFAULTSTATE;
 		}
 
