@@ -129,6 +129,7 @@ public class Scheduler {
 
 		udp.moveElevator(optimalElevatorID, optimalElevator.get(0), r.getErrorMessage()); // tell chosen elevator to go to first request
 																		// floor
+		//System.out.println("line 132 before we sent the error to null, what is being passed to moveElevator is:" + r.getErrorMessage());
 		r.setErrorMessage(null);
 		requests.add(r);
 		// The floor subsystem calls the placeRequest function and gives the Scheduler

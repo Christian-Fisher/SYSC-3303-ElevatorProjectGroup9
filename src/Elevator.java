@@ -11,7 +11,7 @@ public class Elevator implements Runnable {
 	private int currentFloor, requestedFloor;
 	private Direction dir;
 	private int elID;
-	private String Error;
+	private static String Error;
 	private boolean doorsOpen = false;
 
 	public boolean isDoorsOpen() {
@@ -59,8 +59,7 @@ public class Elevator implements Runnable {
 	}
 
 	/**
-	 * Update (increment / decrement) currentFloor based on direction elevator is
-	 * travelling
+	 * Update (increment / decrement) currentFloor based on direction elevator is travelling
 	 */
 	public void updateCurrentFloor() {
 		if (!Error.equals("hard")) {
@@ -105,23 +104,52 @@ public class Elevator implements Runnable {
 	 *
 	 */
 	public enum ElevatorStateMachine {
-
 		CurrFloorDoorsClosed {
 			@Override
 			public ElevatorStateMachine nextState() {
 				return Moving;
 			}
-
+			
 		},
 
 		Moving {
 			@Override
 			public ElevatorStateMachine nextState() {
-				return ArriveReqFloor;
+				if(Error == null) {
+					return ArriveReqFloor;
+				}
+				else {
+					return ErrorState;
+				}
 			}
 
 		},
-
+		
+		ErrorState{
+			@Override
+			public ElevatorStateMachine nextState() {
+				if(Error == "transient") {
+					return transientError;
+				}
+				else {
+					return hardState;
+				}
+			}
+		},
+		
+		transientError{
+			@Override
+			public ElevatorStateMachine nextState() {
+				return Moving;
+			}
+		},
+		
+		hardState{
+			public ElevatorStateMachine nextState() {
+				return null;
+			}
+		},
+		
 		ArriveReqFloor {
 			@Override
 			public ElevatorStateMachine nextState() {
@@ -167,37 +195,62 @@ public class Elevator implements Runnable {
 
 				case Moving: {
 					// Elevator moves to the floor of the request
-
-					int diff = this.getCurrentFloor() - this.getRequestedFloor();
-					if (diff > 0) {
-						this.setDirection(Direction.DOWN);
-						try {
-							this.move();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
+					if (Error == null) {
+						int diff = this.getCurrentFloor() - this.getRequestedFloor();
+						if (diff > 0) {
+							this.setDirection(Direction.DOWN);
+							try {
+								this.move();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						} else if (diff < 0) {
+							this.setDirection(Direction.UP);
+							try {
+								this.move();
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						} else {
+							this.setDirection(Direction.IDLE);
+							currState = currState.nextState();
+							break;
 						}
-					} else if (diff < 0) {
-						this.setDirection(Direction.UP);
-						try {
-							this.move();
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					} else {
-						this.setDirection(Direction.IDLE);
-						currState = currState.nextState();
-						break;
 					}
-
+					else {
+						//We have an error in this request (either transient or Hard Fault)
+						currState = currState.nextState();
+					}
 					break;
 				}
-
+				case ErrorState:{
+					currState = currState.nextState();
+					break;
+				}
+					
+				case hardState:{
+					System.out.println("The elevator with id:" + this.elID + "has experienced a hard fault error.");
+					break;
+				}
+				
+				case transientError:{
+					try {
+						Thread.sleep(250);
+					} catch (InterruptedException e) {
+						System.out.println(e.toString());
+					}
+					this.setError(null);
+					Error = null;
+					currState = currState.nextState();
+					break;
+				}
+				
 				case ArriveReqFloor: {
 					try {
 						this.setDoors(true);
 						Thread.sleep(1100);
 						if (!this.isDoorsOpen()) {
-//							currState=TRANSIENTSTATE;
+							//currState=TRANSIENTSTATE;
 							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
 							break;
 						}
@@ -228,6 +281,7 @@ public class Elevator implements Runnable {
 					break;
 
 				}
+			
 			}
 			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
 				System.out.println("Elevator " + elID + ": Current state: " + currState);
