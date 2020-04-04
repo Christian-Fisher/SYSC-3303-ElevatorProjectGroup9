@@ -103,7 +103,7 @@ public class Scheduler {
 		RequestData[] polledElevators = udp.pollElevators(); // get the in processing request data for every elevator
 		
 		for (int i = 0; i < polledElevators.length; i++) {
-			if(polledElevators[i].getErrorMessage() != null) { // not considering elevators that have an error
+			if(!polledElevators[i].getErrorMessage().equals("null")) { // not considering elevators that have an error
 				continue;
 			}
 			int distanceFromCurrentFloor = Math.abs(c - polledElevators[i].getCurrentFloor());

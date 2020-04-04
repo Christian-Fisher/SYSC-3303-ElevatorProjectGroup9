@@ -138,7 +138,7 @@ public class schedulerUDPThread implements Runnable {
 				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1] +elevatorInfoString[2] );
 				if (elevatorInfoString.length == 3) {	//If there are 2 paramaters in the response
 					// TODO add the proper error message in request data once elevator is modified
-					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1, null); //temporary fix
+					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1, elevatorInfoString[2]); //temporary fix
 					elevatorInfo[elevatorID].setElevatorID(elevatorID);
 					//elevatorInfo[elevatorID].setMove(Direction.valueOf(elevatorInfoString[0]));	//Save the direction
 					//elevatorInfo[elevatorID].setCurrentFloor(Integer.parseInt(elevatorInfoString[1]));	//Save the currentFloor

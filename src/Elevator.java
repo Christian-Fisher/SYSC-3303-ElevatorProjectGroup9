@@ -121,7 +121,18 @@ public class Elevator implements Runnable {
 			}
 
 		},
-
+		transientError{
+			@Override
+			public ElevatorStateMachine nextState() {
+				return ArriveReqFloor;
+			}
+		},
+		
+		hardState{
+			public ElevatorStateMachine nextState() {
+				return hardState;
+			}
+		},
 		ArriveReqFloor {
 			@Override
 			public ElevatorStateMachine nextState() {
@@ -192,12 +203,37 @@ public class Elevator implements Runnable {
 					break;
 				}
 
+				case hardState:{
+					System.out.println("The elevator with id:" + this.elID + "has experienced a hard fault error.");
+					try {
+						Thread.sleep(Long.MAX_VALUE);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					currState = currState.nextState();
+					break;
+				}
+				
+				case transientError:{
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						System.out.println(e.toString());
+					}
+					this.setError("null");
+					Error = "null";
+					currState = currState.nextState();
+					break;
+				}
+				
+				
 				case ArriveReqFloor: {
 					try {
 						this.setDoors(true);
 						Thread.sleep(1100);
 						if (!this.isDoorsOpen()) {
-//							currState=TRANSIENTSTATE;
+							currState=ElevatorStateMachine.transientError;
 							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
 							break;
 						}
@@ -215,7 +251,7 @@ public class Elevator implements Runnable {
 						this.setDoors(false);
 						Thread.sleep(1100);
 						if (this.isDoorsOpen()) {
-//							currState=TRANSIENTSTATE;
+							currState=ElevatorStateMachine.transientError;
 							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
 							break;
 						}
@@ -252,7 +288,7 @@ public class Elevator implements Runnable {
 		if (this.getCurrentFloor() == startFloor) { // If the elevator has not moved after 3 seconds, it is stuck and
 													// therefore is hard faulting
 			System.out.println("Elevator " + this.getElID()+ "in hard fault state");
-//			currState = HARDFAULTSTATE;
+			currState=ElevatorStateMachine.hardState;
 		}
 
 	}
