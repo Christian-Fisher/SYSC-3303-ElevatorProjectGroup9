@@ -58,6 +58,12 @@ public class schedulerUDPThread implements Runnable {
 					//socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Sends an ack message
 					break;
 				}
+				case "remove":{//The message was a remove request from the floor subsystem 
+					System.out.println("remove Received");
+					scheduler.remove(Integer.parseInt(message[1]), Integer.parseInt(message[2]));
+					//Now we have to call a function with the scheduler so we know can remove the current elevator. 
+					break;
+				}
 				}
 			}catch (IOException e) {
 				// TODO Auto-generated catch block

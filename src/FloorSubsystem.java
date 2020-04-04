@@ -58,8 +58,6 @@ public class FloorSubsystem implements Runnable {
 
 			}
 
-	
-
 	/**
 	 * readDataFromFile takes all requests from the inputFile.txt. The method will
 	 * then take the read string and convert it into a RequestData stucture.
@@ -80,7 +78,6 @@ public class FloorSubsystem implements Runnable {
 				String error = splitLine[4];
 
 				dataArray.add(new RequestData(delay, Integer.parseInt(splitLine[2]), move, Integer.parseInt(splitLine[3]),error)); // Creates the RequestData object with the input from the text file
-
 			}
 			fileReader.close();// Closes the file
 		} catch (FileNotFoundException e) {

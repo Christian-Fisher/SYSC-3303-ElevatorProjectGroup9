@@ -44,9 +44,8 @@ public class elevatorUDPThread implements Runnable {
 					//socket.send(new DatagramPacket(ackData, ackData.length, schedulerAddress, schedulerPort));
 					elevator.setRequestedFloor(Integer.parseInt(message[1]));
 					elevator.setError(message[3]);
+					System.out.println("The error is" + message[3]);
 					System.out.println("set req floor to "+ Integer.parseInt(message[1]));
-					
-		
 				}
 				else {
 					throw new IOException("Elevator: Unknown command: " + message[0]);	//If the command was not recognized, throw exception
@@ -76,5 +75,9 @@ public class elevatorUDPThread implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void removeElevator(int elID, int currentFloor) {
+		byte[] removeElData = ("remove" + COMMA + elID + COMMA + currentFloor).getBytes(); //creates removeElevatorMessage 
 	}
 }

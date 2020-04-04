@@ -232,6 +232,10 @@ public class Scheduler {
 		System.out.println("Scheduler state: " + currentState.toString());
 		return;
 	}
+	//Now we need to remove the elevator that is OUT OF SERVICE from the list of elevators working and assign its task to someone else. 
+	public synchronized void remove(int elevatorID, int currentFloor) {
+		
+	}
 	
 	//sending next move asynchronously so that the original function can return
 	private void sendMove(int elevatorID, int nextFloor) {
