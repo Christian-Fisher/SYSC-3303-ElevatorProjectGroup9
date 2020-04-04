@@ -211,6 +211,7 @@ public class Elevator implements Runnable {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					this.dir = Direction.IDLE;
 					currState = currState.nextState();
 					break;
 				}
@@ -221,8 +222,8 @@ public class Elevator implements Runnable {
 					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
-					this.setError("null");
-					Error = "null";
+					this.setError(null);
+					Error = null;
 					currState = currState.nextState();
 					break;
 				}
