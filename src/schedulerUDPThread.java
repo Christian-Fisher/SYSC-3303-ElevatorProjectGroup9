@@ -135,8 +135,8 @@ public class schedulerUDPThread implements Runnable {
 				socket.send(elevatorPollPacket);	//Sends the poll command
 				recSocket.receive(recievedPacket);		//recieves the response
 				String elevatorInfoString[] = new String(recievedPacket.getData()).trim().split(",");	//Creates array containing the individual data elements of the response
-				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1]  );
-				if (elevatorInfoString.length == 2) {	//If there are 2 paramaters in the response
+				System.out.println("Poll recieved: " + elevatorInfoString[0] +elevatorInfoString[1] +elevatorInfoString[2] );
+				if (elevatorInfoString.length == 3) {	//If there are 2 paramaters in the response
 					// TODO add the proper error message in request data once elevator is modified
 					elevatorInfo[elevatorID] = new RequestData(0, Integer.parseInt(elevatorInfoString[1]), Direction.valueOf(elevatorInfoString[0]), -1, null); //temporary fix
 					elevatorInfo[elevatorID].setElevatorID(elevatorID);
