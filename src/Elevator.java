@@ -107,12 +107,7 @@ public class Elevator implements Runnable {
 		CurrFloorDoorsClosed {
 			@Override
 			public ElevatorStateMachine nextState() {
-				if(Error != "hard") {
 					return Moving;
-				}
-				else {
-					return null;
-				}
 			}
 			
 		},
@@ -120,38 +115,22 @@ public class Elevator implements Runnable {
 		Moving {
 			@Override
 			public ElevatorStateMachine nextState() {
-				if(Error != "hard" || Error != "transient") {
-					return ArriveReqFloor;
-				}
-				else {
-					return ErrorState;
-				}
+				return ArriveReqFloor;
 			}
 
 		},
 		
-		ErrorState{
-			@Override
-			public ElevatorStateMachine nextState() {
-				if(Error == "transient") {
-					return transientError;
-				}
-				else {
-					return hardState;
-				}
-			}
-		},
 		
 		transientError{
 			@Override
 			public ElevatorStateMachine nextState() {
-				return ReqFloorDoorsOpened;
+				return ArriveReqFloor;
 			}
 		},
 		
 		hardState{
 			public ElevatorStateMachine nextState() {
-				return CurrFloorDoorsClosed;
+				return hardState;
 			}
 		},
 		
@@ -200,42 +179,38 @@ public class Elevator implements Runnable {
 
 				case Moving: {
 					// Elevator moves to the floor of the request
-					if (Error != "hard" || Error != "transient") {
-						int diff = this.getCurrentFloor() - this.getRequestedFloor();
-						if (diff > 0) {
-							this.setDirection(Direction.DOWN);
-							try {
-								this.move();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						} else if (diff < 0) {
-							this.setDirection(Direction.UP);
-							try {
-								this.move();
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
-						} else {
-							this.setDirection(Direction.IDLE);
-							currState = currState.nextState();
-							break;
+					int diff = this.getCurrentFloor() - this.getRequestedFloor();
+					if (diff > 0) {
+						this.setDirection(Direction.DOWN);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-					}
-					else {
-						//We have an error in this request (either transient or Hard Fault)
-						System.out.println("We have an error");
+					} else if (diff < 0) {
+						this.setDirection(Direction.UP);
+						try {
+							this.move();
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					} else {
+						this.setDirection(Direction.IDLE);
 						currState = currState.nextState();
+						break;
 					}
-					break;
-				}
-				case ErrorState:{
-					currState = currState.nextState();
+					
 					break;
 				}
 					
 				case hardState:{
 					System.out.println("The elevator with id:" + this.elID + "has experienced a hard fault error.");
+					try {
+						Thread.sleep(Long.MAX_VALUE);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					currState = currState.nextState();
 					break;
 				}
@@ -317,7 +292,7 @@ public class Elevator implements Runnable {
 													// therefore is hard faulting
 			System.out.println("Elevator " + this.getElID()+ "in hard fault state");
 			currState = ElevatorStateMachine.hardState;
-//			currState = HARDFAULTSTATE;
+			//currState = HARDFAULTSTATE;
 		}
 
 	}
