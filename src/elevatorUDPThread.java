@@ -62,8 +62,8 @@ public class elevatorUDPThread implements Runnable {
 	 * 
 	 * @param currentFloor	floor the elevator is currently at
 	 */
-	public void completeMove(int elID, int currentFloor) {
-		byte[] completedMoveData = ("moveComplete" +COMMA+elID+COMMA+ currentFloor).getBytes();	//Creates moveCompleteMessage
+	public void completeMove(int elID, int currentFloor, String errorMessage) {
+		byte[] completedMoveData = ("moveComplete" +COMMA+elID+COMMA+ currentFloor+COMMA+errorMessage).getBytes();	//Creates moveCompleteMessage
 		DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 		try {
 			socket.send(new DatagramPacket(completedMoveData, completedMoveData.length, schedulerAddress, schedulerPort));	//Sends message

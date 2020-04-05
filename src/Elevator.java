@@ -260,7 +260,7 @@ public class Elevator implements Runnable {
 
 					}
 					currState = currState.nextState();
-					completeMove(elID, currentFloor);
+					completeMove(elID, currentFloor, Error);
 					break;
 
 				}
@@ -294,11 +294,11 @@ public class Elevator implements Runnable {
 	}
 
 	// completing move asynchronously so that it can return back to state machine
-	private void completeMove(int elID, int currentFloor) {
+	private void completeMove(int elID, int currentFloor, String errorMessage) {
 		new Thread() {
 			@Override
 			public void run() {
-				udp.completeMove(elID, currentFloor);
+				udp.completeMove(elID, currentFloor, errorMessage);
 			}
 		}.start();
 	}

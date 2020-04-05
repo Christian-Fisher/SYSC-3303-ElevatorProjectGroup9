@@ -203,16 +203,18 @@ public class Scheduler {
 	 * @return RequestData - popped RequestData from queue
 	 */
 
-	public synchronized void completeRequest(int elevatorID, int currentFloor) {
+	public synchronized void completeRequest(int elevatorID, int currentFloor, String errorMessage) {
 		// remove currentFloor from elevatorID's queue
 		int indexOfCurrentFloor = elevators.get(elevatorID).indexOf(currentFloor);
+		boolean lastRequest = false;
+		if(elevators.get(elevatorID).size() == 1) { lastRequest = true; }
 		elevators.get(elevatorID).remove(indexOfCurrentFloor);
 		Iterator<RequestData> rIterator = requests.iterator();
 		while(rIterator.hasNext()) {
 			RequestData r = rIterator.next();
 			// destination floor
 			if (r.getElevatorID() == elevatorID ) {
-					if(r.getRequestedFloor() == currentFloor) {
+					if(lastRequest || r.getRequestedFloor() == currentFloor) {
 						udp.toFloor(r);
 						rIterator.remove();
 						currentState = currentState.nextState();
@@ -220,13 +222,13 @@ public class Scheduler {
 						if (elevators.get(elevatorID).size() != 0) {
 							int nextFloor = elevators.get(elevatorID).get(0);
 							System.out.println("New elevator move id=" + elevatorID+ "to floor "+nextFloor);
-							sendMove(elevatorID, nextFloor);
+							sendMove(elevatorID, nextFloor,errorMessage);
 							break;
 						}
 					} else {
 						int nextFloor = elevators.get(elevatorID).get(0);
 						System.out.println("New elevator move id=" + elevatorID+ " to floor "+nextFloor);
-						sendMove(elevatorID, nextFloor);
+						sendMove(elevatorID, nextFloor,errorMessage);
 						break;
 					}
 			}
@@ -237,11 +239,11 @@ public class Scheduler {
 	}
 	
 	//sending next move asynchronously so that the original function can return
-	private void sendMove(int elevatorID, int nextFloor) {
+	private void sendMove(int elevatorID, int nextFloor, String errorMessage) {
 		new Thread() {
 		   @Override
 		   public void run() {
-				udp.moveElevator(elevatorID, nextFloor, null);
+				udp.moveElevator(elevatorID, nextFloor, errorMessage);
 		   }
 		}.start();
 	} 
