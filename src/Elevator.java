@@ -217,7 +217,7 @@ public class Elevator implements Runnable {
 				
 				case transientError:{
 					try {
-						Thread.sleep(100);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
@@ -234,7 +234,7 @@ public class Elevator implements Runnable {
 						Thread.sleep(1100);
 						if (!this.isDoorsOpen()) {
 							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
+							System.out.println("Elevator " + this.getElID()+ " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
@@ -304,7 +304,7 @@ public class Elevator implements Runnable {
 	}
 
 	private void setDoors(boolean open) {
-		if (!Error.equals("transient")||(!Error.equals("transientClose"))) {
+		if (!Error.equals("transient")) {
 			this.setDoorsOpen(open);
 		}
 
