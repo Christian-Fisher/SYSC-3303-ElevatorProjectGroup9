@@ -87,7 +87,7 @@ public class Scheduler {
 	 *          information of request
 	 */
 	public synchronized void placeRequest(RequestData r) {
-		System.out.println("Scheduler state: " + currentState.toString());
+		//System.out.println("Scheduler state: " + currentState.toString());
 
 		System.out.println(r.getDelay() + " -  Request made at floor #" + r.getCurrentFloor() + " to go "
 				+ r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
@@ -139,7 +139,6 @@ public class Scheduler {
 		// all the requests.
 		if (currentState.equals(Scheduler.schedulerStateMachine.noRequests)) {
 			currentState = currentState.nextState(); // changes state to uncompletedRequests
-			System.out.println("Scheduler state: " + currentState.toString());
 		}
 	}
 
@@ -232,7 +231,7 @@ public class Scheduler {
 			}
 		}
 		
-		System.out.println("Scheduler state: " + currentState.toString());
+		//System.out.println("Scheduler state: " + currentState.toString());
 		return;
 	}
 	

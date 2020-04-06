@@ -184,6 +184,7 @@ public class Elevator implements Runnable {
 						this.setDirection(Direction.DOWN);
 						try {
 							this.move();
+							System.out.println("Elevator #" + this.elID + " is moving. Current Floor:  " + this.currentFloor + " Destination: " + this.requestedFloor);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
@@ -191,10 +192,12 @@ public class Elevator implements Runnable {
 						this.setDirection(Direction.UP);
 						try {
 							this.move();
+							System.out.println("Elevator #" + this.elID + " is moving. Current Floor: " + this.currentFloor + " Destination: " +  this.requestedFloor);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					} else {
+						System.out.println("Elevator #"+  this.elID + " has reached the requested floor (Floor #:" + this.requestedFloor + ")");
 						this.setDirection(Direction.IDLE);
 						currState = currState.nextState();
 						break;
@@ -217,7 +220,7 @@ public class Elevator implements Runnable {
 				
 				case transientError:{
 					try {
-						Thread.sleep(100);
+						Thread.sleep(10000);
 					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
@@ -252,7 +255,7 @@ public class Elevator implements Runnable {
 						Thread.sleep(1100);
 						if (this.isDoorsOpen()) {
 							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator " + this.getElID()+ "in transient fault state");
+							System.out.println("Elevator " + this.getElID()+ " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
@@ -303,7 +306,7 @@ public class Elevator implements Runnable {
 	}
 
 	private void setDoors(boolean open) {
-		if (!Error.equals("transient")||(!Error.equals("transientClose"))) {
+		if (!Error.equals("transient")) {
 			this.setDoorsOpen(open);
 		}
 

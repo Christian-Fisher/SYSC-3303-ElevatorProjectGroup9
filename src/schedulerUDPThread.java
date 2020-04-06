@@ -42,6 +42,7 @@ public class schedulerUDPThread implements Runnable {
 				String message[] = new String(recievedPacket.getData()).trim().split(",");	//Split the incoming packet's data into readable words
 				switch (message[0]) {	//The first index will hold the type of message
 				case "moveComplete": {	//If the message was a moveComplete message from an elevator
+					System.out.println("\n");
 					System.out.println("moveComplete Recieved");
 					scheduler.completeRequest(Integer.parseInt(message[1]), Integer.parseInt(message[2]),message[3]);	//Notify the scheduler that the elevator reached it's destination
 					//socket.send(new DatagramPacket(ackData, ackData.length, recievedPacket.getAddress(), recievedPacket.getPort()));	//Send an ack message back
