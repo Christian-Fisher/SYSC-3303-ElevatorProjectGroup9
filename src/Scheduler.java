@@ -110,13 +110,11 @@ public class Scheduler {
 
 			ElevatorDetail ed = new ElevatorDetail(polledElevators[i].getElevatorID(),
 					polledElevators[i].getDirection(), r.getDirection(), distanceFromCurrentFloor);
-			System.out.println("Distance to elevator "+polledElevators[i].getElevatorID()+": "+distanceFromCurrentFloor 
-					+ ", Direction: "+polledElevators[i].getDirection());
 			consideredElevators.add(ed);
 		}
 		Collections.sort(consideredElevators); // sort the elevators
 		int optimalElevatorID = consideredElevators.get(0).id;
-		System.out.println("Optimal Elevator: "+optimalElevatorID);
+		System.out.println("The Optimal Elevator to complete this task is: "+optimalElevatorID);
 
 		r.setElevatorID(optimalElevatorID); // set the elevator id to optimally selected elevator
 		ArrayList<Integer> optimalElevator = elevators.get(optimalElevatorID); // get the elevator's queue
