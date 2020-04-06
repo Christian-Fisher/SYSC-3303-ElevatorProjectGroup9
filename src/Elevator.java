@@ -13,36 +13,20 @@ public class Elevator implements Runnable {
 	private int elID;
 	private String Error;
 	private boolean doorsOpen = false;
-
-	public boolean isDoorsOpen() {
-		return doorsOpen;
-	}
-
-	public void setDoorsOpen(boolean doorsOpen) {
-		this.doorsOpen = doorsOpen;
-	}
-	public String getError() {
-		return Error;
-	}
-
-	public int getElID() {
-		return elID;
-	}
-
-	// intialize elevator state to current floor with doors closed
 	private ElevatorStateMachine currState;
 
 	/**
 	 * Constructor for the Elevator class
 	 * 
-	 * @param scheduler - A Scheduler to coordinate when work must be done
+	 * @param elID - Sets this elevator's ID
 	 */
 	public Elevator(int elID) {
 		this.elID = elID;
 		requestedFloor = 0;
 		currentFloor = 0;
 		dir = Direction.IDLE;
-		currState = ElevatorStateMachine.CurrFloorDoorsClosed;
+		currState = ElevatorStateMachine.CurrFloorDoorsClosed; // intialize elevator state to current floor with doors
+																// closed
 		udp = new elevatorUDPThread(elID, this);
 		Thread udpThread = new Thread(udp);
 		udpThread.setName("Elevator: " + elID);
@@ -63,22 +47,61 @@ public class Elevator implements Runnable {
 	 * travelling
 	 */
 	public void updateCurrentFloor() {
-		if (!Error.equals("hard")) {
+		if (!Error.equals("hard")) { // If a hard error is present, dont update the floor to simulate stuck elevator
 			if (this.getDirection() == Direction.UP) {
 				this.currentFloor++;
 			} else if (this.getDirection() == Direction.DOWN) {
 				this.currentFloor--;
 			}
 		}
-		
+
 	}
 
+	/**
+	 * Getter for requestedFloor
+	 * 
+	 * @return requestedFloor
+	 */
 	public synchronized int getRequestedFloor() {
 		return requestedFloor;
 	}
 
+	/**
+	 * Setter for requestedFloor
+	 * 
+	 * @param requestedFloor Sets the requestedFloor to requestedFloor
+	 */
 	public synchronized void setRequestedFloor(int requestedFloor) {
 		this.requestedFloor = requestedFloor;
+	}
+
+	/** Getter for doorsOpen
+	 * 
+	 * @return doorsOpen
+	 */
+	public boolean isDoorsOpen() {
+		return doorsOpen;
+	}
+/**Setter for doorsOpen
+ * 
+ * @param doorsOpen sets doorsOpen to doorsOpen
+ */
+	public void setDoorsOpen(boolean doorsOpen) {
+		this.doorsOpen = doorsOpen;
+	}
+/**Setter for Error 
+ *  
+ * @return Error
+ */
+	public String getError() {
+		return Error;
+	}
+/**Getter for elevatorID
+ * 
+ * @return elID
+ */
+	public int getElID() {
+		return elID;
 	}
 
 	/**
@@ -121,14 +144,14 @@ public class Elevator implements Runnable {
 			}
 
 		},
-		transientError{
+		transientError {
 			@Override
 			public ElevatorStateMachine nextState() {
 				return ArriveReqFloor;
 			}
 		},
-		
-		hardState{
+
+		hardState {
 			public ElevatorStateMachine nextState() {
 				return hardState;
 			}
@@ -179,25 +202,29 @@ public class Elevator implements Runnable {
 				case Moving: {
 					// Elevator moves to the floor of the request
 
-					int diff = this.getCurrentFloor() - this.getRequestedFloor();
-					if (diff > 0) {
+					int diff = this.getCurrentFloor() - this.getRequestedFloor(); // Calculate difference betwene
+																					// current location and destination
+					if (diff > 0) {// if going down
 						this.setDirection(Direction.DOWN);
 						try {
-							this.move();
-							System.out.println("Elevator #" + this.elID + " is moving. Current Floor:  " + this.currentFloor + " Destination: " + this.requestedFloor);
+							this.move(); // Move down 1 floor
+							System.out.println("Elevator #" + this.elID + " is moving. Current Floor:  "
+									+ this.currentFloor + " Destination: " + this.requestedFloor);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
-					} else if (diff < 0) {
+					} else if (diff < 0) {// if going up
 						this.setDirection(Direction.UP);
 						try {
-							this.move();
-							System.out.println("Elevator #" + this.elID + " is moving. Current Floor: " + this.currentFloor + " Destination: " +  this.requestedFloor);
+							this.move();// move up one floor
+							System.out.println("Elevator #" + this.elID + " is moving. Current Floor: "
+									+ this.currentFloor + " Destination: " + this.requestedFloor);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 					} else {
-						System.out.println("Elevator #"+  this.elID + " has reached the requested floor (Floor #:" + this.requestedFloor + ")");
+						System.out.println("Elevator #" + this.elID + " has reached the requested floor (Floor #:"
+								+ this.requestedFloor + ")");
 						this.setDirection(Direction.IDLE);
 						currState = currState.nextState();
 						break;
@@ -206,81 +233,76 @@ public class Elevator implements Runnable {
 					break;
 				}
 
-				case hardState:{
+				case hardState: {
 					System.out.println("Elevator #:" + this.elID + "has experienced a hard fault error.");
 					try {
-						Thread.sleep(Long.MAX_VALUE);
+						Thread.sleep(Long.MAX_VALUE); // Sleep for a very long time. This is to simulate a irrecoverable
+														// fault. The elevator will stay in this state forever
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					currState = currState.nextState();
+					currState = currState.nextState(); // the next state is hardState, so it will never leave this
+														// state.
 					break;
 				}
-				
-				case transientError:{
+
+				case transientError: {
 					try {
-						Thread.sleep(10000);
+						Thread.sleep(10000); // Simulates the period in which the error is being fixed
 					} catch (InterruptedException e) {
 						System.out.println(e.toString());
 					}
-					this.setError("null");
-					Error = "null";
-					currState = currState.nextState();
+					this.setError("null"); // Clear the error
+					currState = currState.nextState(); // Set the state to the next state
 					break;
 				}
-				
-				
+
 				case ArriveReqFloor: {
 					try {
-						this.setDoors(true);
+						this.setDoors(true); // Try to open doors
 						Thread.sleep(1100);
-						if (!this.isDoorsOpen()) {
-							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator #" + this.getElID()+ " in transient fault state");
+						if (!this.isDoorsOpen()) {// If the doors didnt open
+							currState = ElevatorStateMachine.transientError;// move to transient error state
+							System.out.println("Elevator #" + this.getElID() + " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
 						System.out.println("Door open Timer interrupted. Who did that?");
 					}
 
-					currState = currState.nextState();
+					currState = currState.nextState();// Move to next state
 					break;
 
 				}
 
 				case ReqFloorDoorsOpened: {
 					try {
-						this.setDoors(false);
-						Thread.sleep(1100);
-						if (this.isDoorsOpen()) {
-							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator #" + this.getElID()+ " in transient fault state");
+						this.setDoors(false);// Try to close doors
+						Thread.sleep(1100);// Wait the until doors close
+						if (this.isDoorsOpen()) {// if the doors didnt close
+							currState = ElevatorStateMachine.transientError;// move to transient error state
+							System.out.println("Elevator #" + this.getElID() + " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
 						System.out.println("Door close Timer interrupted. Who did that?");
 
 					}
-					currState = currState.nextState();
-					completeMove(elID, currentFloor, Error);
+					currState = currState.nextState();// Move to next state
+					completeMove(elID, currentFloor, Error); // Update the scheduler that this elevator has completed
+																// its move.
 					break;
 
 				}
-			}
-			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
 			}
 		}
 	}
 
 	/**
-	 * Method moves the elevator either up or down to the desired floor
+	 * Method moves the elevator either up or down 1 floor. This method checks for
+	 * hard faults
 	 * 
-	 * @param currentFloor - int representing the floor the elevator is currently
-	 *                     one
-	 * @param d            - Direction the elevator must move to reach desired floor
-	 * @param desiredFloor - int representing the desired floor that has been
-	 *                     requested to go to
 	 * @throws InterruptedException
 	 */
 	private void move() throws InterruptedException {
@@ -289,8 +311,8 @@ public class Elevator implements Runnable {
 		Thread.sleep(3000);
 		if (this.getCurrentFloor() == startFloor) { // If the elevator has not moved after 3 seconds, it is stuck and
 													// therefore is hard faulting
-			System.out.println("Elevator #" + this.getElID()+ "in hard fault state");
-			currState=ElevatorStateMachine.hardState;
+			System.out.println("Elevator #" + this.getElID() + "in hard fault state");
+			currState = ElevatorStateMachine.hardState;
 		}
 
 	}
@@ -305,9 +327,15 @@ public class Elevator implements Runnable {
 		}.start();
 	}
 
+	/**
+	 * This method opens or closes the doors. If there is a transient error, the
+	 * method will fail
+	 * 
+	 * @param open true for opening doors, false for closing doors
+	 */
 	private void setDoors(boolean open) {
-		if (!Error.equals("transient")) {
-			this.setDoorsOpen(open);
+		if (!Error.equals("transient")) { // If the error is not transient
+			this.setDoorsOpen(open); // setDoors
 		}
 
 	}
