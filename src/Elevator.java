@@ -266,7 +266,6 @@ public class Elevator implements Runnable {
 				}
 			}
 			if (currState != ElevatorStateMachine.CurrFloorDoorsClosed) {
-				System.out.println("Elevator " + elID + ": Current state: " + currState);
 			}
 		}
 	}
