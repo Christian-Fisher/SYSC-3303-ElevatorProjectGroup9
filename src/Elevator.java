@@ -255,7 +255,7 @@ public class Elevator implements Runnable {
 						Thread.sleep(1100);
 						if (this.isDoorsOpen()) {
 							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator " + this.getElID()+ " in transient fault state");
+							System.out.println("Elevator #" + this.getElID()+ " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
