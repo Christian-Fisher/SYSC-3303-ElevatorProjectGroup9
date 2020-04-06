@@ -207,7 +207,7 @@ public class Elevator implements Runnable {
 				}
 
 				case hardState:{
-					System.out.println("The elevator with id:" + this.elID + "has experienced a hard fault error.");
+					System.out.println("Elevator #:" + this.elID + "has experienced a hard fault error.");
 					try {
 						Thread.sleep(Long.MAX_VALUE);
 					} catch (InterruptedException e) {
@@ -237,7 +237,7 @@ public class Elevator implements Runnable {
 						Thread.sleep(1100);
 						if (!this.isDoorsOpen()) {
 							currState=ElevatorStateMachine.transientError;
-							System.out.println("Elevator " + this.getElID()+ " in transient fault state");
+							System.out.println("Elevator #" + this.getElID()+ " in transient fault state");
 							break;
 						}
 					} catch (InterruptedException e) {
@@ -289,7 +289,7 @@ public class Elevator implements Runnable {
 		Thread.sleep(3000);
 		if (this.getCurrentFloor() == startFloor) { // If the elevator has not moved after 3 seconds, it is stuck and
 													// therefore is hard faulting
-			System.out.println("Elevator " + this.getElID()+ "in hard fault state");
+			System.out.println("Elevator #" + this.getElID()+ "in hard fault state");
 			currState=ElevatorStateMachine.hardState;
 		}
 
@@ -314,7 +314,7 @@ public class Elevator implements Runnable {
 
 	public void setError(String errorMessage) {
 		this.Error = errorMessage;
-		System.out.println("Elevator " + this.getElID() + " Error Status: " + errorMessage);
+		System.out.println("Elevator #" + this.getElID() + " Error Status: " + errorMessage);
 
 	}
 }
