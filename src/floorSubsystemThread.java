@@ -4,6 +4,12 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.Arrays;
 
+/**
+ * This class represents the thread that is used to communicate between the FloorSubsystem and the scheduler thread.
+ * 
+ * @author Christian Fisher
+ * @version 1.0 2020-04-06
+ */
 public class floorSubsystemThread implements Runnable {
 	private FloorSubsystem floor;	//Reference to Floor
 	private final int floorPort = 98;	//FloorUDP port
@@ -15,6 +21,7 @@ public class floorSubsystemThread implements Runnable {
 	private final byte[] ackData = "ack".getBytes();	//byte array containing "ack" to be used when acknowledging messages
 
 	/**
+	 * Constructor for floorSubsystemThread.
 	 * 
 	 * @param floor Reference to floor
 	 */
@@ -23,18 +30,20 @@ public class floorSubsystemThread implements Runnable {
 		try {
 			socket = new DatagramSocket();
 			recSocket = new DatagramSocket(floorPort);
-			schedulerAddress = InetAddress.getLocalHost(); // TODO LOCALHOST
+			schedulerAddress = InetAddress.getLocalHost();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
 	}
 
+	/**
+	 * This method will receive DatagramPackets once a request is completed.
+	 */
 	public void run() {
 		while(true) {
 			try {
-				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//create packet to recieve into
+				DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);	//create packet to receive into
 				recSocket.receive(recievedPacket);	//Recieve command
 				String message[] = new String(recievedPacket.getData()).trim().split(",");		//Convert to readable format
 				if(message[0].equals("completeRequest")) {		//If the command is a completedRequest
@@ -50,24 +59,18 @@ public class floorSubsystemThread implements Runnable {
 		}
 	}
 
-/**Sends a request to the scheduler
- * 
- * @param request The request to send to scheduler
- */
+	/**Sends a request to the scheduler
+	 * 
+	 * @param request The request to send to scheduler
+	 */
 	public void sendRequest(RequestData request) {
 		try {
 			byte[] dataToSend = ("newRequest" + COMMA + request.getCurrentFloor() + COMMA + request.getDirection().toString() + COMMA
 					+ request.getRequestedFloor() + COMMA + request.getErrorMessage()).getBytes();	//Creates the message out of the input RequestData
 			DatagramPacket requestPacket = new DatagramPacket(dataToSend, dataToSend.length, schedulerAddress,
 					schedulerPort);	//Creates packet to send to scheduler
-			DatagramPacket recievedPacket = new DatagramPacket(new byte[100], 100);
 			socket.send(requestPacket);	//Sends packet
-			/*recSocket.receive(recievedPacket);	//Recieves packet
-			if(!(new String(recievedPacket.getData()).trim().equals("ack"))) {	//If recieved packet is not an acknowledgement
-				throw new IOException("not ack recieved");	//throw Exception
-			}*/
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

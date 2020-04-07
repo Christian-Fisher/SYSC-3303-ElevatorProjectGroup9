@@ -2,8 +2,8 @@
  * This class represents an Elevator that is to be part of an elevator control
  * simulator.
  * 
- * @author Sonia Hassan-legault, Nicholas Porter
- * @version 3.0 2020-02-15
+ * @author Sonia Hassan-legault, Nicholas Porter, Karanvir Chaudhary, Christian Fisher
+ * @version 4.0 2020-04-06
  *
  */
 public class Elevator implements Runnable {
@@ -25,7 +25,7 @@ public class Elevator implements Runnable {
 		requestedFloor = 0;
 		currentFloor = 0;
 		dir = Direction.IDLE;
-		currState = ElevatorStateMachine.CurrFloorDoorsClosed; // intialize elevator state to current floor with doors
+		currState = ElevatorStateMachine.CurrFloorDoorsClosed; // initialize elevator state to current floor with doors
 																// closed
 		udp = new elevatorUDPThread(elID, this);
 		Thread udpThread = new Thread(udp);
@@ -82,38 +82,38 @@ public class Elevator implements Runnable {
 	public boolean isDoorsOpen() {
 		return doorsOpen;
 	}
-/**Setter for doorsOpen
- * 
- * @param doorsOpen sets doorsOpen to doorsOpen
- */
+	/**Setter for doorsOpen
+	 * 
+	 * @param doorsOpen sets doorsOpen to doorsOpen
+	 */
 	public void setDoorsOpen(boolean doorsOpen) {
 		this.doorsOpen = doorsOpen;
 	}
-/**Setter for Error 
- *  
- * @return Error
- */
+	/**Setter for Error 
+	 *  
+	 * @return Error
+	 */
 	public String getError() {
 		return Error;
 	}
-/**Getter for elevatorID
- * 
- * @return elID
- */
+	/**Getter for elevatorID
+	 * 
+	 * @return elID
+	 */
 	public int getElID() {
 		return elID;
 	}
 
 	/**
 	 * 
-	 * @return Direction elevator is travelling
+	 * @return Direction elevator is traveling
 	 */
 	public Direction getDirection() {
 		return this.dir;
 	}
 
 	/**
-	 * Set the direction the elevator is travelling
+	 * Set the direction the elevator is traveling
 	 * 
 	 * @param d (Direction)
 	 */
@@ -123,7 +123,7 @@ public class Elevator implements Runnable {
 
 	/**
 	 * 
-	 * @author Nicholas Porter State machine for the elvator using Java enums 4
+	 * @author Nicholas Porter State machine for the elevator using Java enums 4
 	 *         states in total
 	 *
 	 */
@@ -202,7 +202,7 @@ public class Elevator implements Runnable {
 				case Moving: {
 					// Elevator moves to the floor of the request
 
-					int diff = this.getCurrentFloor() - this.getRequestedFloor(); // Calculate difference betwene
+					int diff = this.getCurrentFloor() - this.getRequestedFloor(); // Calculate difference between
 																					// current location and destination
 					if (diff > 0) {// if going down
 						this.setDirection(Direction.DOWN);
@@ -239,7 +239,6 @@ public class Elevator implements Runnable {
 						Thread.sleep(Long.MAX_VALUE); // Sleep for a very long time. This is to simulate a irrecoverable
 														// fault. The elevator will stay in this state forever
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					currState = currState.nextState(); // the next state is hardState, so it will never leave this
@@ -262,7 +261,7 @@ public class Elevator implements Runnable {
 					try {
 						this.setDoors(true); // Try to open doors
 						Thread.sleep(1100);
-						if (!this.isDoorsOpen()) {// If the doors didnt open
+						if (!this.isDoorsOpen()) {// If the doors didn't open
 							currState = ElevatorStateMachine.transientError;// move to transient error state
 							System.out.println("Elevator #" + this.getElID() + " in transient fault state");
 							break;
@@ -280,7 +279,7 @@ public class Elevator implements Runnable {
 					try {
 						this.setDoors(false);// Try to close doors
 						Thread.sleep(1100);// Wait the until doors close
-						if (this.isDoorsOpen()) {// if the doors didnt close
+						if (this.isDoorsOpen()) {// if the doors didn't close
 							currState = ElevatorStateMachine.transientError;// move to transient error state
 							System.out.println("Elevator #" + this.getElID() + " in transient fault state");
 							break;
@@ -299,7 +298,7 @@ public class Elevator implements Runnable {
 		}
 	}
 
-	/**
+	/*
 	 * Method moves the elevator either up or down 1 floor. This method checks for
 	 * hard faults
 	 * 
@@ -317,7 +316,9 @@ public class Elevator implements Runnable {
 
 	}
 
-	// completing move asynchronously so that it can return back to state machine
+	/*
+	 * Completing a move asynchronously so that it can return back to state machine
+	 */
 	private void completeMove(int elID, int currentFloor, String errorMessage) {
 		new Thread() {
 			@Override
@@ -327,7 +328,7 @@ public class Elevator implements Runnable {
 		}.start();
 	}
 
-	/**
+	/*
 	 * This method opens or closes the doors. If there is a transient error, the
 	 * method will fail
 	 * 
@@ -340,6 +341,11 @@ public class Elevator implements Runnable {
 
 	}
 
+	/**
+	 * Sets the errorMessage for the elevator
+	 * 
+	 * @param String - errorMessage is the string that the Error is to be set to
+	 */
 	public void setError(String errorMessage) {
 		this.Error = errorMessage;
 		System.out.println("Elevator #" + this.getElID() + " Error Status: " + errorMessage);

@@ -1,12 +1,5 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Scanner;
 
@@ -22,9 +15,12 @@ import java.util.Scanner;
  */
 public class FloorSubsystem implements Runnable {
 
-	 // Contains the reference to the scheduler
 	LinkedList<RequestData> dataArray = new LinkedList<RequestData>(); // Holds all the data read from the file
 	floorSubsystemThread udpFloorSubsystemThread;
+	
+	/**
+	 * Constructor for FloorSubsystem. Initiates the thread, starts it and reads the input file.
+	 */
 	public FloorSubsystem() {
 		this.udpFloorSubsystemThread = new floorSubsystemThread(this);
 		Thread floorUDP = new Thread(udpFloorSubsystemThread);
@@ -53,16 +49,14 @@ public class FloorSubsystem implements Runnable {
 					Thread.currentThread().interrupt();
 				}
 				udpFloorSubsystemThread.sendRequest(dataArray.pop());
-				//System.out.println("Next request: "+dataArray.peek());
 			}
 
-			}
+	}
 
 	
-
-	/**
+	/*
 	 * readDataFromFile takes all requests from the inputFile.txt. The method will
-	 * then take the read string and convert it into a RequestData stucture.
+	 * then take the read string and convert it into a RequestData structure.
 	 * 
 	 */
 	private void readDataFromFile() {

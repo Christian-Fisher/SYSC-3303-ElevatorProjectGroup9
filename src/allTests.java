@@ -12,12 +12,24 @@ class allTests {
 	Elevator elevator;
 
 	@BeforeEach
-	void setUp() throws Exception {
-//		scheduler = new Scheduler(4);	
-//		floorSubsystem = new FloorSubsystem(scheduler);
-//		elevator = new Elevator(scheduler);
-//		floorThread = new Thread(new FloorSubsystem(scheduler));	
-//		elevatorThread = new Thread(new Elevator(scheduler));
+	void setUp() throws Exception {		
+		int numOfElevators = 4;
+		Scheduler scheduler = new Scheduler(numOfElevators);
+		Thread floorThread = new Thread(new FloorSubsystem());
+		floorThread.setName("floorThread");
+		Thread[] elevatorThreadArray = new Thread[numOfElevators];
+		for (int i = 0; i < numOfElevators; i++) {
+			elevatorThreadArray[i] = new Thread(new Elevator(i));
+			elevatorThreadArray[i].setName("Elevator" + i);
+			elevatorThreadArray[i].start();
+		}
+		// initialize floor thread and passing this scheduler
+		
+		floorThread.start();
+
+		// initialize elevator threads and passing with scheduler
+
+		// start all threads
 	}
 	
 	/**
@@ -28,7 +40,7 @@ class allTests {
 	 */
 	@Test
 	void testreadDataFromFile() {	
-		assertEquals(2, floorSubsystem.getdataArray().size(),"Size of dataArray should be 2." );
+		assertEquals(9, floorSubsystem.getdataArray().size(),"Size of dataArray should be 9." );
 	}
 	
 	/**

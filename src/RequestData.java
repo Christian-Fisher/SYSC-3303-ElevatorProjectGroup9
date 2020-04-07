@@ -1,11 +1,4 @@
-
-
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.StringTokenizer;
 
 /**
  * 
@@ -27,6 +20,15 @@ public class RequestData implements Serializable {
 	private int elevatorID;
 	private String errorMessage;
 	
+	/**
+	 * Constructor for RequestData with parameters.
+	 * 
+	 * @param delay - amount of time the system waits before sending the request
+	 * @param currentFloor - the floor where the request was made
+	 * @param direction - whether the elevator will need to go Up or Down
+	 * @param requestFloor - the desired destination floor
+	 * @param errorMessage - can either be "transient" or "hard", null otherwise
+	 */
 	public RequestData(int delay, int currentFloor, Direction direction, int requestFloor, String errorMessage) {
 		this.delay = delay;
 		this.currentFloor = currentFloor;
@@ -37,6 +39,9 @@ public class RequestData implements Serializable {
 
 	}
 	
+	/**
+	 * Constructor for RequestData. Sets variables to default values.
+	 */
 	public RequestData() {
 		this.delay =0;
 		this.currentFloor = -1;
@@ -116,8 +121,4 @@ public class RequestData implements Serializable {
 	public Direction getDirection() {
 		return this.move;
 	}
-
-
-	
-
 }

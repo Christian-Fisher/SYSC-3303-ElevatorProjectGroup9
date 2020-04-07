@@ -4,6 +4,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * This class represents the details of the elevators and overrides the compareTo to be able to compare
+ * the elevators based on their details.
+ * 
+ * @author Dhyan Pathak
+ *
+ */
 class ElevatorDetail implements Comparable<ElevatorDetail> {
 	int id;
 	Direction direction;
@@ -69,6 +76,11 @@ public class Scheduler {
 	// 2D Array representing queue for every elevator
 	private ArrayList<ArrayList<Integer>> elevators = new ArrayList<ArrayList<Integer>>();
 
+	/**
+	 * Constructor for the Scheduler.
+	 * 
+	 * @param numOfElevators - the number of Elevators running on the system.
+	 */
 	public Scheduler(int numOfElevators) {
 		Thread udpThread = new Thread(udp);
 		udpThread.setName("udpThread");
@@ -87,7 +99,6 @@ public class Scheduler {
 	 *          information of request
 	 */
 	public synchronized void placeRequest(RequestData r) {
-		//System.out.println("Scheduler state: " + currentState.toString());
 
 		System.out.println(r.getDelay() + " -  Request made at floor #" + r.getCurrentFloor() + " to go "
 				+ r.getDirection().toString() + " to floor # " + r.getRequestedFloor());
@@ -141,33 +152,6 @@ public class Scheduler {
 			currentState = currentState.nextState(); // changes state to uncompletedRequests
 		}
 	}
-
-	/**
-	 * Method invoked by Elevator subsystem to accept new request to fulfill
-	 * 
-	 * @return RequestData - peek of the first RequestData in requests queue
-	 * @throws ParseException
-	 */
-//	public synchronized RequestData processRequest() {
-//		while(requests.peek()==null) {		//Checks for the case where the list is empty
-//			try {
-//				wait();						//Waits until the list is not empty
-//			}catch(InterruptedException e) {
-//				e.printStackTrace();
-//			}
-//		}
-//		
-//		RequestData r = requests.peek();
-//		System.out.println("Request at " + r.getTime().toString() + " (" + r.getCurrentFloor() + " -> " + r.getRequestedFloor() + ") is being processed");
-//		//the elevators call the processRequest, and they get back one of the requests saved in the scheduler. 
-//		//The elevator then processes the request and makes a call to completedRequest when finished. 
-//
-//		currentState = currentState.nextState(); //Changes current state from uncompletedRequets to requestAdded. 
-//
-//		System.out.println("Scheduler state: "+currentState.toString());
-//		return r;
-//		
-//	}
 
 	/**
 	 * 
@@ -231,11 +215,12 @@ public class Scheduler {
 			}
 		}
 		
-		//System.out.println("Scheduler state: " + currentState.toString());
 		return;
 	}
 	
-	//sending next move asynchronously so that the original function can return
+	/*
+	 * Sending next move asynchronously so that the original function can return
+	 */
 	private void sendMove(int elevatorID, int nextFloor, String errorMessage) {
 		new Thread() {
 		   @Override
